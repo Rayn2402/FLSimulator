@@ -1,5 +1,11 @@
 """
     File containing all code related to machine learning models available for federated learning simulation
+
+    NOTE :
+            - L indicates the original dimension of feature vectors include in database X
+            - M indicates the dimension of new feature vectors returned by phi
+            - N indicates the number of feature vectors in the database X
+
 """
 import random
 import numpy as np
@@ -14,7 +20,7 @@ class LinearModel:
         Linear Machine Learning Models
 
         :param phi: basis function applied to training data
-        :param M: dimension of the output vector returned by phi (including bias)
+        :param M: dimension of the feature vector returned by phi (including bias)
         :param eta: learning rate during the training
         """
         if eta <= 0:
@@ -25,16 +31,16 @@ class LinearModel:
         self.w = self.__init_weight(M)
 
     @staticmethod
-    def __init_weight(weight_vec_dim):
+    def __init_weight(M):
 
         """
         Init weight vector with random values between -10 and 10
 
-        :param weight_vec_dim: dimensions that w vector must satisfied
-        :return: weight_vec_dim X 1 numpy array
+        :param M: dimensions that w vector must satisfied
+        :return: M X 1 numpy array
         """
-        w = np.array(random.sample(range(1, 10), weight_vec_dim))
-        w.resize((weight_vec_dim, 1))
+        w = np.array(random.sample(range(1, 10), M))
+        w.resize((M, 1))
         return w
 
     def train(self, X, t, new_weights=None):
@@ -42,10 +48,10 @@ class LinearModel:
         """
         Train our linear model
 
-        :param X: N x M numpy array with training data
+        :param X: N x L numpy array with training data (L --> original number of feature)
         :param t: N x 1 numpy array with training labels
-        :param new_weights: Starting point of SGD in weights space (default = self.w)
-        :return: updated weight vector
+        :param new_weights: Starting point of SGD in weight space (default = self.w)
+        :return: updated weight vector (M x 1 numpy array)
         """
         if new_weights is not None:
             self.w = new_weights
@@ -60,7 +66,7 @@ class LinearModel:
         """
         Predict the label for an input x
 
-        :param x: 1 x N numpy array
+        :param x: 1 x L numpy array
         :return: predicted label
         """
 
@@ -101,7 +107,7 @@ class SGDRegressor(LinearModel):
         SGD Linear Regression Machine Learning Models
 
         :param phi: basis function applied to training data
-        :param M: dimension of the output vector returned by phi (including bias)
+        :param M: dimension of the feature vector returned by phi (including bias)
         :param eta: learning rate during the training
         :param lamb: parameter in regularization term added to least square lost "lamb*(w_transpose)*(w)"
         """
