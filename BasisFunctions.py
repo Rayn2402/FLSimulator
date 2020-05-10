@@ -17,7 +17,7 @@ def identity_with_bias(x):
     return x
 
 
-def polynomial_decorator(deg):
+def polynomial_features(deg):
 
     poly = PolynomialFeatures(degree=deg, include_bias=True)
 
