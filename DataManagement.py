@@ -13,7 +13,64 @@ from scipy.stats import beta
 label_function_choices = ['linear', 'sin', 'tanh']
 
 
-class OneDimensionalRDG:
+class OneDimensionalDG:
+
+    def __init__(self, N, a=1, b=1, noise=0):
+
+        """
+        One Dimension Data Generator
+
+        :param N: number of 1-D feature vector needed
+        :param a: alpha parameter of the beta distribution that generate the features
+        :param b: beta parameter of the beta distribution that generate the features
+        :param noise: noise added to the data labels (definition depend on the One dimensional DG child class)
+
+        """
+        if not 0 <= noise <= 1:
+            raise Exception('Noise value must be included between 0 and 1')
+        self.n = N
+        self.alpha = a
+        self.beta = b
+        self.noise = noise
+        self.label_function = None
+
+    def generate_data(self):
+
+        """
+        Generates labels associated with the features
+
+        :return: N x 1 numpy array with feature vectors, N x 1 numpy array with labels
+
+        """
+        raise NotImplementedError
+
+    @staticmethod
+    def plot_feature_distribution(X):
+
+        """
+        Shows an histogram of the feature distribution X
+
+        :param X: N x 1 numpy array
+        """
+
+        plt.hist(X)
+        plt.show()
+        plt.close()
+
+    def plot_labels(self, X, t, add_ground_truth=False):
+
+        if add_ground_truth:
+            X_sample = np.linspace(0, 1, 500)
+            X_sample.resize((500, 1))
+            t_sample = self.label_function(X_sample)
+            plt.plot(X_sample, t_sample)
+
+        plt.plot(X, t, 'ro')
+        plt.show()
+        plt.close()
+
+
+class OneDimensionalRDG(OneDimensionalDG):
 
     def __init__(self, N, noise=0, a=1, b=1, label_function='linear'):
 
@@ -30,18 +87,16 @@ class OneDimensionalRDG:
         if label_function not in label_function_choices:
             raise Exception('Label function chosen is not recognized')
 
-        self.n = N
-        self.noise = noise
-        self.alpha = a
-        self.beta = b
-        self.labels = None
+        super().__init__(N, a, b, noise)
+
         self.label_function = self.generate_label_function(label_function)
 
-    def generate_data(self, function=False):
+    def generate_data(self):
 
         """
         Generate noisy labels associated with the features
-        :return: N x 1 numpy array with feature vector, N x 1 numpy array with labels
+
+        :return: N x 1 numpy array with feature vectors, N x 1 numpy array with labels
         """
         # Generate features
         features = np.array(beta.rvs(a=self.alpha, b=self.beta, size=self.n))
@@ -53,13 +108,17 @@ class OneDimensionalRDG:
         random_noise.resize((features.shape[0], 1))
         labels += random_noise
 
-        if function:
-            return features, labels, self.label_function
-        else:
-            return features, labels
+        return features, labels
 
     @staticmethod
     def generate_label_function(choice):
+
+        """
+        Generates the function that will produce labels associated with the features
+
+        :param choice: label_function choice in ['linear', 'sin', 'tanh']
+        :return: function
+        """
 
         if choice == 'sin':
 
@@ -85,31 +144,76 @@ class OneDimensionalRDG:
 
         return f
 
-    @staticmethod
-    def plot_feature_distribution(X):
+
+class OneDimensionalLRDG(OneDimensionalDG):
+
+    def __init__(self, N, a=1, b=1, noise=0.10, increasing_prob=True, steepness=1):
 
         """
-        Shows an histogram of the feature distribution X
+        One Dimension Logistic Regression DataGenerator
 
-        :param X: N x 1 numpy array
+        :param N: number of 1-D feature vector needed
+        :param a: alpha parameter of the beta distribution that generate the features
+        :param b: beta parameter of the beta distribution that generate the features
+        :param noise: standard deviation of the gaussian noise applied to the probabilities used to generate labels
+        :param increasing_prob: indicates if the sigmoid used to generate labels is increasing or decreasing
+        :param steepness: describes how steep is the sigmoid 1/(1+exp(-steepness*X))
+
         """
-
-        plt.hist(X)
-        plt.show()
-        plt.close()
+        super().__init__(N, a, b, noise)
+        self.label_function = self.generate_label_function(increasing_prob, steepness)
 
     @staticmethod
-    def plot_labels(X, t, ground_truth_function=None):
+    def generate_label_function(increasing_prob, steepness):
 
-        if ground_truth_function is not None:
-            X_sample = np.linspace(0, 1, 500)
-            X_sample.resize((500, 1))
-            t_sample = ground_truth_function(X_sample)
-            plt.plot(X_sample, t_sample)
+        """
+        Generates the function that will produce labels associated with the features
 
-        plt.plot(X, t, 'ro')
-        plt.show()
-        plt.close()
+        :return: function
+
+        """
+        if increasing_prob:
+            m = -steepness
+        else:
+            m = steepness
+
+        def f(X):
+            return 1/(1+np.exp(m*(X-0.5)*10))
+
+        return f
+
+    def generate_data(self):
+
+        """
+        Generates labels associated with the features
+
+        :return: N x 1 numpy array with feature vectors, N x 1 numpy array with labels
+        """
+
+        # Generate features
+        features = np.array(beta.rvs(a=self.alpha, b=self.beta, size=self.n))
+        features.resize((self.n, 1))
+
+        # Generate probabilities
+        probability = self.label_function(features)
+
+        # Generate noise to add to the probabilities
+        random_noise = np.random.normal(loc=0, scale=self.noise, size=features.shape[0])
+        random_noise.resize((features.shape[0], 1))
+        probability += random_noise
+        probability[probability < 0] = 0
+        probability[probability > 1] = 1
+
+        # Generate labels with a bernouilli
+        labels = np.array([np.random.binomial(n=1, p=probability[n:n+1]) for n in range(self.n)])
+        labels.resize((self.n, 1))
+
+        return features, labels
+
+
+
+
+
 
 
 
