@@ -67,8 +67,11 @@ class LinearModel:
         else:
 
             def lr_update(last_loss, nb_w_update, X, t):
-                if last_loss < self.loss(X, t):
-                   self.eta /= 2
+                current_loss = self.loss(X, t)
+                if last_loss < current_loss:
+                    self.eta /= 2
+
+                last_loss = current_loss
 
         return lr_update
 
@@ -90,7 +93,6 @@ class LinearModel:
         # Variable ignition
         eta0 = self.eta
         last_loss = self.loss(X, t)
-        nb_update = 0
 
         # Weights optimization
         for i in range(nb_epoch):
