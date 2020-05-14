@@ -156,7 +156,7 @@ class LinearModel:
 
 class SGDRegressor(LinearModel):
 
-    def __init__(self, phi, M, eta0=1, learning_rate='invscaling', lamb=0):
+    def __init__(self, phi, M, eta0=1, learning_rate='invscaling'):
 
         """
         SGD Linear Regression Machine Learning Models
@@ -165,10 +165,7 @@ class SGDRegressor(LinearModel):
         :param M: dimension of the feature vector returned by phi (including bias)
         :param eta0: learning rate initial value in the training
         :param learning_rate: learning rate schedule
-        :param lamb: parameter in regularization term added to least square lost "lamb*(w_transpose)*(w)"
         """
-
-        self.lamb = lamb
         super().__init__(phi, M, eta0, learning_rate=learning_rate)
 
     def update_w(self, x_n, t_n):
