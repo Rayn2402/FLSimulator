@@ -75,7 +75,7 @@ class LinearModel:
 
         return lr_update
 
-    def train(self, X, t, nb_epoch, minibatch_size=10, weight_init=None):
+    def train(self, X, t, nb_epoch, minibatch_size=1, weight_init=None):
 
         """
         Train our linear model
@@ -163,12 +163,12 @@ class LinearModel:
         plt.close()
 
 
-class SGDRegressor(LinearModel):
+class GDRegressor(LinearModel):
 
     def __init__(self, phi, M, eta0=1, learning_rate='invscaling'):
 
         """
-        SGD Linear Regression Machine Learning Models
+        Linear Regression Machine Learning Models that trains with Gradient Descent
 
         :param phi: basis function applied to training data
         :param M: dimension of the feature vector returned by phi (including bias)
@@ -225,7 +225,7 @@ class SGDRegressor(LinearModel):
             return np.dot(loss.transpose(), loss)
 
 
-class SGDLogisticRegressor(LinearModel):
+class LogisticRegressor(LinearModel):
 
     def __init__(self, phi, M, eta0=1, learning_rate='invscaling'):
         """
