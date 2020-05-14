@@ -101,7 +101,7 @@ class CentralServer:
         selected_node_list = self.select_nodes(node_list)
 
         for node in selected_node_list:
-            node.train()
+            node.train(self.E, self.C)
 
         self.aggregate(selected_node_list)
 
