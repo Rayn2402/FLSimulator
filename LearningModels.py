@@ -65,20 +65,24 @@ class LinearModel:
                 self.eta = eta0/(nb_w_update**0.25)
 
         else:
-
             def lr_update(last_loss, nb_w_update, X, t):
-                if last_loss < self.loss(X, t):
-                   self.eta /= 2
+                current_loss = self.loss(X, t)
+                if last_loss < current_loss:
+                    self.eta /= 2
+                    print(self.eta)
+
+                last_loss = current_loss
 
         return lr_update
 
-    def train(self, X, t, nb_epoch, weight_init=None):
+    def train(self, X, t, nb_epoch, minibatch_size=1, weight_init=None):
 
         """
         Train our linear model
 
         :param X: N x L numpy array with training data (L --> original number of feature)
         :param t: N x 1 numpy array with training labels
+        :param minibatch_size: size of minibatches used is gradient descent
         :param weight_init: Starting point of SGD in weight space (default = self.w)
         :return: updated weight vector (M x 1 numpy array)
         """
@@ -88,15 +92,20 @@ class LinearModel:
             self.w = weight_init
 
         # Variable ignition
+        nb_minibatch = int(np.ceil(X.shape[0]/minibatch_size))
         eta0 = self.eta
         last_loss = self.loss(X, t)
-        nb_update = 0
+
+        # Data Shuffling
+        X, t = shuffle(X, t)
 
         # Weights optimization
         for i in range(nb_epoch):
-            X, t = shuffle(X, t)
-            for n in range(X.shape[0]):
-                self.update_w(X[n:n+1], t[n:n+1])
+
+            for n in range(nb_minibatch):
+                start = n*minibatch_size
+                end = min(X.shape[0], (n+1)*minibatch_size)
+                self.update_w(X[start:end], t[start:end])
                 self.lr_update(last_loss=last_loss, nb_w_update=(n+1+i*X.shape[0]), X=X, t=t)
 
         self.eta = eta0
@@ -125,13 +134,13 @@ class LinearModel:
 
         raise NotImplementedError
 
-    def update_w(self, x_n, t_n):
+    def update_w(self, X_k, t_k):
 
         """
-        Weight update in SGD
+        Weight update in SGD of the k-th minibatch
 
-        :param x_n: n-th feature vector of our training data set
-        :param t_n: label associated to the n-th feature vector
+        :param X_k: minibatch_size x L numpy array of features
+        :param t_k: minibatch_size x 1 numpy array of labels
         :return: updated weight vector
         """
         raise NotImplementedError
@@ -154,12 +163,12 @@ class LinearModel:
         plt.close()
 
 
-class SGDRegressor(LinearModel):
+class GDRegressor(LinearModel):
 
     def __init__(self, phi, M, eta0=1, learning_rate='invscaling'):
 
         """
-        SGD Linear Regression Machine Learning Models
+        Linear Regression Machine Learning Models that trains with Gradient Descent
 
         :param phi: basis function applied to training data
         :param M: dimension of the feature vector returned by phi (including bias)
@@ -168,16 +177,22 @@ class SGDRegressor(LinearModel):
         """
         super().__init__(phi, M, eta0, learning_rate=learning_rate)
 
-    def update_w(self, x_n, t_n):
+    def update_w(self, X_k, t_k):
 
         """
-        Weight update in SGD
+        Weight update in SGD of the k-th minibatch
 
-        :param x_n: n-th feature vector of our training data set (1 X L numpy array)
-        :param t_n: label associated to the n-th feature vector (1 x 1 numpy array)
+        :param X_k: minibatch_size x L numpy array of features
+        :param t_k: minibatch_size x 1 numpy array of labels
         :return: updated weight vector
         """
-        self.w = self.w + self.eta*(t_n[0][0] - self.predict(x_n))*self.phi(x_n).transpose()
+        weight_sum = np.zeros((len(self.w), 1))
+        minibatch_size = X_k.shape[0]
+
+        for n in range(minibatch_size):
+            weight_sum += (t_k[n:n+1][0][0] - self.predict(X_k[n:n+1]))*self.phi(X_k[n:n+1]).transpose()
+
+        self.w = self.w + self.eta*(1/minibatch_size)*weight_sum
 
     def predict(self, x):
 
@@ -210,7 +225,7 @@ class SGDRegressor(LinearModel):
             return np.dot(loss.transpose(), loss)
 
 
-class SGDLogisticRegressor(LinearModel):
+class LogisticRegressor(LinearModel):
 
     def __init__(self, phi, M, eta0=1, learning_rate='invscaling'):
         """
@@ -224,16 +239,22 @@ class SGDLogisticRegressor(LinearModel):
 
         super().__init__(phi, M, eta0, learning_rate=learning_rate)
 
-    def update_w(self, x_n, t_n):
+    def update_w(self, X_k, t_k):
 
         """
-        Weight update in SGD
+        Weight update in SGD of the k-th minibatch
 
-        :param x_n: n-th feature vector of our training data set (1 X L numpy array)
-        :param t_n: label associated to the n-th feature vector (1 x 1 numpy array)
+        :param X_k: minibatch_size x L numpy array of features
+        :param t_k: minibatch_size x 1 numpy array of labels
         :return: updated weight vector
         """
-        self.w = self.w + self.eta*(self.predict(x_n) - t_n[0][0])*self.phi(x_n).transpose()
+        weight_sum = np.zeros((len(self.w), 1))
+        minibatch_size = X_k.shape[0]
+
+        for n in range(minibatch_size):
+            weight_sum += (self.predict(X_k[n:n + 1]) - t_k[n:n + 1][0][0]) * self.phi(X_k[n:n + 1]).transpose()
+
+        self.w = self.w + self.eta * (1 / minibatch_size) * weight_sum
 
     def predict(self, x):
 
