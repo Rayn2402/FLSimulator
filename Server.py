@@ -5,6 +5,7 @@ federated learning model
 
 """
 import random
+import copy
 
 aggregation_choices = ['FedAvg']
 node_selection_choices = ['all', 'random']
@@ -78,4 +79,30 @@ class CentralServer:
             self.global_model.w = sum([(node.n/N)*node.model.w for node in node_list])
 
         return aggregate
+
+    def copy_global_model(self, node_list):
+
+        """
+        Copy global model in each node of the node list
+        Used in the initialization of a Network
+
+        :param node_list: list of nodes
+        """
+        for node in node_list:
+            node.model = copy.deepcopy(self.global_model)
+
+    def train(self, node_list):
+
+        """
+        Train the global model among a list of nodes
+
+        :param node_list: list of nodes
+        """
+        selected_node_list = self.select_nodes(node_list)
+
+        for node in selected_node_list:
+            node.train()
+
+        self.aggregate(selected_node_list)
+
 
