@@ -4,6 +4,7 @@ File containing CentralServer class that dispatches training of global model in 
 federated learning model
 
 """
+import numpy as np
 import random
 import copy
 
@@ -101,8 +102,26 @@ class CentralServer:
         selected_node_list = self.select_nodes(node_list)
 
         for node in selected_node_list:
-            node.train(self.E, self.C, copy.deepcopy(self.global_model.w))
+            node.update(self.E, self.C, copy.deepcopy(self.global_model.w))
 
         self.aggregate(selected_node_list)
 
+    def plot_global_accuracy(self, node_list, start, stop):
+
+        """
+        Plots the model result over the complete network dataset
+        Only available if the model as the function plot_model implemented (1-D or 2-D model)
+
+        :param node_list: list of nodes
+        :param start: start on x-axis
+        :param stop: stop on x-axis
+        """
+        X_total = node_list[0].X
+        t_total = node_list[0].t
+
+        for node in node_list[1:]:
+            X_total = np.append(X_total, node.X)
+            t_total = np.append(t_total, node.t)
+
+        self.global_model.plot_model(X_total, t_total, start, stop)
 
