@@ -101,7 +101,7 @@ class CentralServer:
         selected_node_list = self.select_nodes(node_list)
 
         for node in selected_node_list:
-            node.train(self.E, self.C)
+            node.train(self.E, self.C, copy.deepcopy(self.global_model.w))
 
         self.aggregate(selected_node_list)
 
