@@ -56,16 +56,19 @@ class FederatedNetwork:
         self.nodes = node_list
         self.server.copy_global_model(self.nodes)
 
-    def run_learning(self, nb_of_rounds=1):
+    def run_learning(self, nb_of_rounds=1, show_round_results=(False, 0, 1)):
 
         """
         Run the federated learning
 
         :param nb_of_rounds: Rounds of federated learning to do
+        :param show_round_results: tuple (bool, start, stop)
         """
 
         for i in range(nb_of_rounds):
             self.server.train(self.nodes)
+            if show_round_results[0]:
+                self.global_accuracy(show_round_results[1], show_round_results[2])
 
     def global_accuracy(self, start, stop):
 
