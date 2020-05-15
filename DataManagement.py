@@ -59,6 +59,14 @@ class OneDimensionalDG:
 
     def plot_labels(self, X, t, add_ground_truth=False):
 
+        """
+        Plots the labels point (x_n, t_n)
+
+        :param X: N x 1 numpy array
+        :param t: N x 1 numpy array
+        :param add_ground_truth: bool indicating if we should plot function used to generate labels
+        """
+
         if add_ground_truth:
             X_sample = np.linspace(0, 1, 500)
             X_sample.resize((500, 1))
@@ -66,6 +74,29 @@ class OneDimensionalDG:
             plt.plot(X_sample, t_sample)
 
         plt.plot(X, t, 'ro')
+        plt.show()
+        plt.close()
+
+    def distribution_and_labels(self, X, t, title=None):
+
+        """
+        Plots a figure with both feature distribution and labels
+
+        :param X: N x 1 numpy array
+        :param t: N x 1 numpy array
+        :param title: plot title
+        """
+
+        fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(5, 3))
+
+        if title is not None:
+            fig.suptitle(title)
+
+        axes[0].plot(X, t, 'ro')
+        axes[0].set_title('Labels')
+        axes[1].hist(X)
+        axes[1].set_title('Feature Distribution')
+        fig.tight_layout()
         plt.show()
         plt.close()
 
