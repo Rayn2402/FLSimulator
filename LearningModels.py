@@ -145,7 +145,7 @@ class LinearModel:
         """
         raise NotImplementedError
 
-    def plot_curve(self, X, t, start, stop):
+    def plot_model(self, X, t, start, stop):
 
         """
         Plot the curve prediction of our model (only available with 1-D feature space)
