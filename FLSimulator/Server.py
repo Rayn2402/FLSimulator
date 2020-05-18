@@ -90,7 +90,7 @@ class CentralServer:
         :param node_list: list of nodes
         """
         for node in node_list:
-            node.model = copy.deepcopy(self.global_model)
+            node.model = self.global_model.copy()
 
     def train(self, node_list):
 
