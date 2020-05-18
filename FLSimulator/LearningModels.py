@@ -167,8 +167,8 @@ class LinearModel:
         """
         x_sample = np.arange(start, stop, 0.01)
         t_sample = [self.predict(np.array([[x]])) for x in x_sample]
-        plt.plot(x_sample, t_sample)
         plt.plot(X, t, 'ro')
+        plt.plot(x_sample, t_sample, 'k')
         plt.show()
         plt.close()
 
