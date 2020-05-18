@@ -1,7 +1,7 @@
-from DataManagement import OneDimensionalRDG, OneDimensionalLRDG
+from .DataManagement import OneDimensionalRDG, OneDimensionalLRDG
 
-from LearningModels import GDRegressor, LogisticRegressor
+from .LearningModels import GDRegressor, LogisticRegressor
 
-from Network import Node, FederatedNetwork
+from .Network import Node, FederatedNetwork
 
-from Server import CentralServer
+from .Server import CentralServer

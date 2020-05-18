@@ -7,7 +7,7 @@
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-from BasisFunctions import polynomial_features
+from .BasisFunctions import polynomial_features
 from scipy.stats import beta
 
 label_function_choices = ['linear', 'sin', 'tanh']
