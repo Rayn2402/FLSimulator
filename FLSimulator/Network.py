@@ -9,16 +9,16 @@ class Node:
 
     __counter = 0
 
-    def __init__(self, DataGenerator):
+    def __init__(self, X, t):
 
         """
         Node of a federated network
 
-        :param DataGenerator: object that generates data
+        :param X: N x M numpy array of original features
+        :param t: N x 1 numpy array of labels associated with the features
         """
 
-        self.DG = DataGenerator
-        self.X, self.t = self.DG.generate_data()
+        self.X, self.t = X, t
         self.n = self.X.shape[0]
         self.model = None
         self.id = 'Node ' + str(Node.__counter)
