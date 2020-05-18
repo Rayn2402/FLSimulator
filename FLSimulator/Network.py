@@ -24,6 +24,9 @@ class Node:
         self.id = 'Node ' + str(Node.__counter)
         Node.__counter += 1
 
+    def __repr__(self):
+        return self.id
+
     def update(self, E, C, w):
 
         """
@@ -37,7 +40,7 @@ class Node:
         if self.model is None:
             raise Exception('Node has no model to train')
 
-        self.model.train(self.X, self.t, E, C, w)
+        self.model.train(self.X, self.t, E, C, weight_init=w)
 
 
 class FederatedNetwork:
@@ -80,4 +83,4 @@ class FederatedNetwork:
         :param stop: stop on x-axis
         """
 
-        self.server.plot_global_accuracy(self, self.nodes, start, stop)
+        self.server.plot_global_accuracy(self.nodes, start, stop)
