@@ -71,9 +71,9 @@ class FederatedNetwork:
         for i in range(nb_of_rounds):
             self.server.train(self.nodes)
             if show_round_results[0]:
-                self.global_accuracy(show_round_results[1], show_round_results[2])
+                self.global_accuracy(show_round_results[1], show_round_results[2], title='Round ' + str(i + 1))
 
-    def global_accuracy(self, start, stop):
+    def global_accuracy(self, start, stop, title=None):
 
         """
         Plots the model result over the complete network dataset
@@ -81,6 +81,7 @@ class FederatedNetwork:
 
         :param start: start on x-axis
         :param stop: stop on x-axis
+        :param title: title of the figure
         """
 
-        self.server.plot_global_accuracy(self.nodes, start, stop)
+        self.server.plot_global_accuracy(self.nodes, start, stop, title)

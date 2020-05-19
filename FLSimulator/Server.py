@@ -106,7 +106,7 @@ class CentralServer:
 
         self.aggregate(selected_node_list)
 
-    def plot_global_accuracy(self, node_list, start, stop):
+    def plot_global_accuracy(self, node_list, start, stop, title=None):
 
         """
         Plots the model result over the complete network dataset
@@ -115,13 +115,21 @@ class CentralServer:
         :param node_list: list of nodes
         :param start: start on x-axis
         :param stop: stop on x-axis
+        :param title: title of the figure
         """
         X_total = node_list[0].X
         t_total = node_list[0].t
 
         for node in node_list[1:]:
-            X_total = np.append(X_total, node.X)
-            t_total = np.append(t_total, node.t)
+            X_total = np.append(X_total, node.X, axis=0)
+            t_total = np.append(t_total, node.t, axis=0)
 
-        self.global_model.plot_model(X_total, t_total, start, stop)
+        loss = round(self.global_model.loss(X_total, t_total), 2)
+
+        if title is None:
+            title = 'Loss : ' + str(loss)
+        else:
+            title += ' - Loss ' + str(loss)
+
+        self.global_model.plot_model(X_total, t_total, start, stop, title)
 
