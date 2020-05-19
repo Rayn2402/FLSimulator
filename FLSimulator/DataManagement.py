@@ -236,7 +236,7 @@ class OneDimensionalLRDG(OneDimensionalDG):
         probability[probability > 1] = 1
 
         # Generate labels with a bernouilli
-        labels = np.array([np.random.binomial(n=1, p=probability[n:n+1]) for n in range(self.n)])
+        labels = np.array([np.random.binomial(n=1, p=probability[n:n+1]) for n in range(N)])
         labels.resize((N, 1))
 
         return features, labels
