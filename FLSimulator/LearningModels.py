@@ -113,6 +113,14 @@ class LinearModel:
         self.eta = eta0
         return self.w
 
+    def reset_weights(self):
+
+        """
+        Resets the weights of the model
+
+        """
+        self.w = self.__init_weight(len(self.w))
+
     def loss(self, X, t):
 
         """
