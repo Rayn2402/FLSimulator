@@ -9,6 +9,7 @@
 """
 
 import numpy as np
+from copy import deepcopy
 from matplotlib import pyplot as plt
 from sklearn.utils import shuffle
 
@@ -37,6 +38,7 @@ class LinearModel:
         self.phi = phi
         self.eta = eta0
         self.w = self.__init_weight(M)
+        self.lr_schedule = learning_rate
         self.lr_update = self.__init_learning_rate_function(eta0, learning_rate)
 
     @staticmethod
@@ -69,7 +71,6 @@ class LinearModel:
                 current_loss = self.loss(X, t)
                 if last_loss < current_loss:
                     self.eta /= 2
-                    print(self.eta)
 
                 last_loss = current_loss
 
@@ -111,6 +112,14 @@ class LinearModel:
         self.eta = eta0
         return self.w
 
+    def reset_weights(self):
+
+        """
+        Resets the weights of the model
+
+        """
+        self.w = self.__init_weight(len(self.w))
+
     def loss(self, X, t):
 
         """
@@ -145,7 +154,15 @@ class LinearModel:
         """
         raise NotImplementedError
 
-    def plot_curve(self, X, t, start, stop):
+    def copy(self):
+
+        """
+        Creates a copy of the model
+
+        """
+        return NotImplementedError
+
+    def plot_model(self, X, t, start, stop, title=None):
 
         """
         Plot the curve prediction of our model (only available with 1-D feature space)
@@ -153,12 +170,15 @@ class LinearModel:
         :param t: 1 x N numpy array with training labels
         :param start: starting point on x-axis
         :param stop: ending point on x-axis
+        :param title: title of the figure
         :return:
         """
         x_sample = np.arange(start, stop, 0.01)
         t_sample = [self.predict(np.array([[x]])) for x in x_sample]
-        plt.plot(x_sample, t_sample)
         plt.plot(X, t, 'ro')
+        plt.plot(x_sample, t_sample, 'k')
+        if title is not None:
+            plt.title(title)
         plt.show()
         plt.close()
 
@@ -219,10 +239,21 @@ class GDRegressor(LinearModel):
         loss = pred - t
 
         if return_predictions:
-            return np.dot(loss.transpose(), loss), pred
+            return np.dot(loss.transpose(), loss)[0][0], pred
 
         else:
-            return np.dot(loss.transpose(), loss)
+            return np.dot(loss.transpose(), loss)[0][0]
+
+    def copy(self):
+
+        """
+        Creates a copy of the model
+
+        """
+        copy = GDRegressor(self.phi, 1, self.eta, self.lr_schedule)
+        copy.w = deepcopy(self.w)
+
+        return copy
 
 
 class LogisticRegressor(LinearModel):
@@ -289,6 +320,17 @@ class LogisticRegressor(LinearModel):
         errors = np.array(errors)
 
         return -np.sum(errors)
+
+    def copy(self):
+
+        """
+        Creates a copy of the model
+
+        """
+        copy = LogisticRegressor(self.phi, 1, self.eta, self.lr_schedule)
+        copy.w = deepcopy(self.w)
+
+        return copy
 
 
 
