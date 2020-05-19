@@ -15,12 +15,11 @@ label_function_choices = ['linear', 'sin', 'tanh']
 
 class OneDimensionalDG:
 
-    def __init__(self, N, a=1, b=1, noise=0):
+    def __init__(self, a=1, b=1, noise=0):
 
         """
         One Dimension Data Generator
 
-        :param N: number of 1-D feature vector needed
         :param a: alpha parameter of the beta distribution that generate the features
         :param b: beta parameter of the beta distribution that generate the features
         :param noise: noise added to the data labels (definition depend on the One dimensional DG child class)
@@ -28,17 +27,18 @@ class OneDimensionalDG:
         """
         if not 0 <= noise <= 1:
             raise Exception('Noise value must be included between 0 and 1')
-        self.n = N
+
         self.alpha = a
         self.beta = b
         self.noise = noise
         self.label_function = None
 
-    def generate_data(self):
+    def generate_data(self, N):
 
         """
         Generates labels associated with the features
 
+        :param N: number of 1-D feature vector needed
         :return: N x 1 numpy array with feature vectors, N x 1 numpy array with labels
 
         """
@@ -103,12 +103,11 @@ class OneDimensionalDG:
 
 class OneDimensionalRDG(OneDimensionalDG):
 
-    def __init__(self, N, noise=0, a=1, b=1, label_function='linear'):
+    def __init__(self, noise=0, a=1, b=1, label_function='linear'):
 
         """
         One Dimensional Regression Data Generator
 
-        :param N: number of 1-D feature vector needed
         :param noise: standard deviation of the gaussian noise applied to the labels
         :param a: alpha parameter of the beta distribution that generate the features
         :param b: beta parameter of the beta distribution that generate the features
@@ -118,20 +117,21 @@ class OneDimensionalRDG(OneDimensionalDG):
         if label_function not in label_function_choices:
             raise Exception('Label function chosen is not recognized')
 
-        super().__init__(N, a, b, noise)
+        super().__init__(a, b, noise)
 
         self.label_function = self.generate_label_function(label_function)
 
-    def generate_data(self):
+    def generate_data(self, N):
 
         """
         Generate noisy labels associated with the features
 
+        :param N: number of 1-D feature vector needed
         :return: N x 1 numpy array with feature vectors, N x 1 numpy array with labels
         """
         # Generate features
-        features = np.array(beta.rvs(a=self.alpha, b=self.beta, size=self.n))
-        features.resize((self.n, 1))
+        features = np.array(beta.rvs(a=self.alpha, b=self.beta, size=N))
+        features.resize((N, 1))
 
         # Generate labels and add noise
         labels = self.label_function(features)
@@ -178,12 +178,11 @@ class OneDimensionalRDG(OneDimensionalDG):
 
 class OneDimensionalLRDG(OneDimensionalDG):
 
-    def __init__(self, N, a=1, b=1, noise=0.10, increasing_prob=True, steepness=1):
+    def __init__(self, a=1, b=1, noise=0.10, increasing_prob=True, steepness=1):
 
         """
         One Dimension Logistic Regression DataGenerator
 
-        :param N: number of 1-D feature vector needed
         :param a: alpha parameter of the beta distribution that generate the features
         :param b: beta parameter of the beta distribution that generate the features
         :param noise: standard deviation of the gaussian noise applied to the probabilities used to generate labels
@@ -191,7 +190,7 @@ class OneDimensionalLRDG(OneDimensionalDG):
         :param steepness: describes how steep is the sigmoid 1/(1+exp(-steepness*X))
 
         """
-        super().__init__(N, a, b, noise)
+        super().__init__(a, b, noise)
         self.label_function = self.generate_label_function(increasing_prob, steepness)
 
     @staticmethod
@@ -213,17 +212,18 @@ class OneDimensionalLRDG(OneDimensionalDG):
 
         return f
 
-    def generate_data(self):
+    def generate_data(self, N):
 
         """
         Generates labels associated with the features
 
+        :param N: number of 1-D feature vector needed
         :return: N x 1 numpy array with feature vectors, N x 1 numpy array with labels
         """
 
         # Generate features
-        features = np.array(beta.rvs(a=self.alpha, b=self.beta, size=self.n))
-        features.resize((self.n, 1))
+        features = np.array(beta.rvs(a=self.alpha, b=self.beta, size=N))
+        features.resize((N, 1))
 
         # Generate probabilities
         probability = self.label_function(features)
@@ -237,7 +237,7 @@ class OneDimensionalLRDG(OneDimensionalDG):
 
         # Generate labels with a bernouilli
         labels = np.array([np.random.binomial(n=1, p=probability[n:n+1]) for n in range(self.n)])
-        labels.resize((self.n, 1))
+        labels.resize((N, 1))
 
         return features, labels
 
