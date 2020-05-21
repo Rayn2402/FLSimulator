@@ -202,6 +202,8 @@ class GDRegressor(LinearModel):
         """
         Weight update in SGD of the k-th minibatch
 
+        Gradient computation reference : Bishop, Pattern Recognition and Machine Learning, p.144
+
         :param X_k: minibatch_size x L numpy array of features
         :param t_k: minibatch_size x 1 numpy array of labels
         :return: updated weight vector
@@ -274,6 +276,8 @@ class LogisticRegressor(LinearModel):
 
         """
         Weight update in SGD of the k-th minibatch
+
+        Gradient computation reference : Bishop, Pattern Recognition and Machine Learning, p.206
 
         :param X_k: minibatch_size x L numpy array of features
         :param t_k: minibatch_size x 1 numpy array of labels
