@@ -303,7 +303,7 @@ class OneDimensionalLRDG(OneDimensionalDG):
         :param title: plot title
         """
 
-        fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(5, 3))
+        fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(6, 3))
 
         if title is not None:
             fig.suptitle(title)
@@ -312,6 +312,8 @@ class OneDimensionalLRDG(OneDimensionalDG):
         axes[0].set_title('Labels')
         axes[1].hist(X)
         axes[1].set_title('Feature Distribution')
+        axes[2].bar(x=[0, 1], height=[(t == 0).sum(), (t == 1).sum()], color=['blue', 'red'], edgecolor='k')
+        axes[2].set_title('Count')
         fig.tight_layout()
         plt.show()
         plt.close()
