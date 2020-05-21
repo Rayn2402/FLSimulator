@@ -343,7 +343,7 @@ class LogisticRegressor(LinearModel):
     def plot_model(self, X, t, title=None):
 
         """
-        Plot the curve prediction of our model (only available with 1-D feature space)
+        Plot the curve prediction of our model (only available with 1-D or 2-D feature space)
 
         :param X: N x 1 numpy array with training data
         :param t: 1 x N numpy array with training labels
@@ -360,13 +360,22 @@ class LogisticRegressor(LinearModel):
         plt.plot(x_sample, t_sample, 'k')
 
         # Ground-truth points
-        plt.scatter(X, predictions, c=t, cmap='bwr')
+        plt.scatter(X, predictions, c=t, edgecolors='k', cmap='bwr')
 
         if title is not None:
             plt.title(title)
 
         plt.show()
         plt.close()
+
+
+
+
+
+
+
+
+
 
 
 

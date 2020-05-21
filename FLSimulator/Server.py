@@ -117,7 +117,7 @@ class CentralServer:
         feature_size = self.global_model.phi(input_sample).shape[1]
         self.global_model.init_weight(feature_size)
 
-    def plot_global_accuracy(self, node_list, start, stop, title=None):
+    def plot_global_accuracy(self, node_list, title=None):
 
         """
         Plots the model result over the complete network dataset
@@ -142,5 +142,5 @@ class CentralServer:
         else:
             title += ' - Loss ' + str(loss)
 
-        self.global_model.plot_model(X_total, t_total, start, stop, title)
+        self.global_model.plot_model(X_total, t_total, title)
 

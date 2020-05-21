@@ -241,6 +241,28 @@ class OneDimensionalLRDG(OneDimensionalDG):
 
         return features, labels
 
+    def distribution_and_labels(self, X, t, title=None):
+
+        """
+        Plots a figure with both feature distribution and labels
+
+        :param X: N x 1 numpy array
+        :param t: N x 1 numpy array
+        :param title: plot title
+        """
+
+        fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(5, 3))
+
+        if title is not None:
+            fig.suptitle(title)
+
+        axes[0].scatter(X, t, c=t, edgecolors='k', cmap='bwr')
+        axes[0].set_title('Labels')
+        axes[1].hist(X)
+        axes[1].set_title('Feature Distribution')
+        fig.tight_layout()
+        plt.show()
+        plt.close()
 
 
 
