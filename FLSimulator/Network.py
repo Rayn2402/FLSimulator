@@ -57,6 +57,7 @@ class FederatedNetwork:
 
         self.server = central_server
         self.nodes = node_list
+        self.server.init_global_model_weights(self.nodes)
         self.server.copy_global_model(self.nodes)
 
     def run_learning(self, nb_of_rounds=1, show_round_results=(False, 0, 1)):

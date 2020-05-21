@@ -106,6 +106,17 @@ class CentralServer:
 
         self.aggregate(selected_node_list)
 
+    def init_global_model_weights(self, node_list):
+
+        """
+        Initializes the weights of the global model
+
+        :param node_list: list of nodes
+        """
+        input_sample = node_list[0].X[0:1]
+        feature_size = self.global_model.phi(input_sample).shape[1]
+        self.global_model.init_weight(feature_size)
+
     def plot_global_accuracy(self, node_list, start, stop, title=None):
 
         """

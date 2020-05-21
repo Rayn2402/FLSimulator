@@ -18,7 +18,7 @@ learning_rate_choices = ['constant', 'adaptive', 'invscaling']
 
 class LinearModel:
 
-    def __init__(self, phi, M, eta0=1, learning_rate='invscaling'):
+    def __init__(self, phi, eta0=1, learning_rate='invscaling'):
 
         """
         Linear Machine Learning Models
@@ -37,12 +37,11 @@ class LinearModel:
 
         self.phi = phi
         self.eta = eta0
-        self.w = self.__init_weight(M)
+        self.w = None
         self.lr_schedule = learning_rate
         self.lr_update = self.__init_learning_rate_function(eta0, learning_rate)
 
-    @staticmethod
-    def __init_weight(M):
+    def init_weight(self, M):
 
         """
         Init weight vector with random values
@@ -52,7 +51,7 @@ class LinearModel:
         """
         w = np.random.randn(M)
         w.resize((M, 1))
-        return w
+        self.w = w
 
     def __init_learning_rate_function(self, eta0, lr_choice):
 
@@ -92,6 +91,13 @@ class LinearModel:
         if weight_init is not None:
             self.w = weight_init
 
+        # Weight ignition if not done yet
+        if self.w is None:
+
+            # We compute feature size applying phi function on first vector in dataset X
+            feature_size = self.phi(X[0:1]).shape[1]
+            self.init_weight(feature_size)
+
         # Variable ignition
         nb_minibatch = int(np.ceil(X.shape[0]/minibatch_size))
         eta0 = self.eta
@@ -118,7 +124,7 @@ class LinearModel:
         Resets the weights of the model
 
         """
-        self.w = self.__init_weight(len(self.w))
+        self.init_weight(len(self.w))
 
     def loss(self, X, t):
 
@@ -185,7 +191,7 @@ class LinearModel:
 
 class GDRegressor(LinearModel):
 
-    def __init__(self, phi, M, eta0=1, learning_rate='invscaling'):
+    def __init__(self, phi, eta0=1, learning_rate='invscaling'):
 
         """
         Linear Regression Machine Learning Models that trains with Gradient Descent
@@ -195,7 +201,7 @@ class GDRegressor(LinearModel):
         :param eta0: learning rate initial value in the training
         :param learning_rate: learning rate schedule
         """
-        super().__init__(phi, M, eta0, learning_rate=learning_rate)
+        super().__init__(phi, eta0, learning_rate=learning_rate)
 
     def update_w(self, X_k, t_k):
 
@@ -252,7 +258,7 @@ class GDRegressor(LinearModel):
         Creates a copy of the model
 
         """
-        copy = GDRegressor(self.phi, 1, self.eta, self.lr_schedule)
+        copy = GDRegressor(self.phi, self.eta, self.lr_schedule)
         copy.w = deepcopy(self.w)
 
         return copy
@@ -260,7 +266,7 @@ class GDRegressor(LinearModel):
 
 class LogisticRegressor(LinearModel):
 
-    def __init__(self, phi, M, eta0=1, learning_rate='invscaling'):
+    def __init__(self, phi, eta0=1, learning_rate='invscaling'):
         """
         SGD Linear Regression Machine Learning Models
 
@@ -270,7 +276,7 @@ class LogisticRegressor(LinearModel):
         :param learning_rate: learning rate schedule
         """
 
-        super().__init__(phi, M, eta0, learning_rate=learning_rate)
+        super().__init__(phi, eta0, learning_rate=learning_rate)
 
     def update_w(self, X_k, t_k):
 
@@ -331,7 +337,7 @@ class LogisticRegressor(LinearModel):
         Creates a copy of the model
 
         """
-        copy = LogisticRegressor(self.phi, 1, self.eta, self.lr_schedule)
+        copy = LogisticRegressor(self.phi, self.eta, self.lr_schedule)
         copy.w = deepcopy(self.w)
 
         return copy
