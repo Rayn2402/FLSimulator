@@ -8,7 +8,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 from .BasisFunctions import polynomial_features
-from scipy.stats import beta
+from scipy.stats import beta, multivariate_normal
 
 label_function_choices = ['linear', 'sin', 'tanh']
 
@@ -53,7 +53,7 @@ class OneDimensionalDG:
         :param X: N x 1 numpy array
         """
 
-        plt.hist(X)
+        plt.hist(X, color='C7')
         plt.show()
         plt.close()
 
@@ -181,7 +181,7 @@ class OneDimensionalRDG(OneDimensionalDG):
         if add_ground_truth:
             self.plot_ground_truth()
 
-        plt.plot(X, t, 'ro')
+        plt.plot(X, t, 'o')
         plt.show()
         plt.close()
 
@@ -201,9 +201,9 @@ class OneDimensionalRDG(OneDimensionalDG):
         if title is not None:
             fig.suptitle(title)
 
-        axes[0].plot(X, t, 'ro')
+        axes[0].plot(X, t, 'o')
         axes[0].set_title('Labels')
-        axes[1].hist(X)
+        axes[1].hist(X, color='C7')
         axes[1].set_title('Feature Distribution')
         fig.tight_layout()
         plt.show()
@@ -275,7 +275,7 @@ class OneDimensionalLRDG(OneDimensionalDG):
 
         return features, labels
 
-    def plot_labels(self, X, t, add_ground_truth=False):
+    def plot_labels(self, X, t, add_ground_truth=False, axe=None):
 
         """
         Plots the labels point (x_n, t_n)
@@ -288,12 +288,25 @@ class OneDimensionalLRDG(OneDimensionalDG):
         if add_ground_truth:
             self.plot_ground_truth()
 
-        plt.scatter(X, t, c=t, edgecolors='k', cmap='bwr')
-        plt.show()
-        plt.close()
+        # We make a copy of data with label added as a column
+        a = np.hstack((X, t))
+        a = a[a[:, 1].argsort()]
 
-    @staticmethod
-    def distribution_and_labels(X, t, title=None):
+        # We find index of class separation
+        i = 0
+        while a[i][1] == 0:
+            i += 1
+
+        if axe is not None:
+            axe.scatter(a[:i, 0], a[:i, 1], edgecolors='k')
+            axe.scatter(a[i:, 0], a[i:, 1], edgecolors='k')
+        else:
+            plt.scatter(a[:i, 0], a[:i, 1], edgecolors='k')
+            plt.scatter(a[i:, 0], a[i:, 1], edgecolors='k')
+            plt.show()
+            plt.close()
+
+    def distribution_and_labels(self, X, t, title=None):
 
         """
         Plots a figure with both feature distribution and labels
@@ -308,15 +321,141 @@ class OneDimensionalLRDG(OneDimensionalDG):
         if title is not None:
             fig.suptitle(title)
 
-        axes[0].scatter(X, t, c=t, edgecolors='k', cmap='bwr')
+        # Labels
+        self.plot_labels(X, t, axe=axes[0])
         axes[0].set_title('Labels')
-        axes[1].hist(X)
+
+        # Histogram
+        axes[1].hist(X, color='C7')
         axes[1].set_title('Feature Distribution')
-        axes[2].bar(x=[0, 1], height=[(t == 0).sum(), (t == 1).sum()], color=['blue', 'red'], edgecolor='k')
+
+        # Bar plot
+        axes[2].bar(x=[0, 1], height=[(t == 0).sum(), (t == 1).sum()], color=['C0', 'C1'], edgecolor='k')
         axes[2].set_title('Count')
+
         fig.tight_layout()
         plt.show()
         plt.close()
+
+
+class TwoClusterGenerator:
+
+    @staticmethod
+    def generate_data(sample_sizes, centers=[[0, 0.5], [1, 0.5]], std_devs=[[0.10, 0.10], [0.10, 0.10]]):
+
+        """
+        Generates the clusters
+
+        :param sample_sizes: list with number of samples to produce for each class
+
+        :return:
+
+        """
+        if len(sample_sizes) != 2:
+            raise Exception("size of argument does not match with the number of classes")
+
+        X = multivariate_normal.rvs(centers[0], std_devs[0], size=sample_sizes[0])
+        t = np.zeros((sample_sizes[0], 1))
+
+        X = np.append(X, multivariate_normal.rvs(centers[1], std_devs[1], size=sample_sizes[1]), axis=0)
+        t = np.append(t, np.ones((sample_sizes[1], 1)), axis=0)
+
+        return X, t
+
+    @staticmethod
+    def plot_labels(X, t, axe=None):
+
+        """
+        Plots the labels
+
+        :param X: N x 2 numpy array
+        :param t: N x 1 numpy array
+
+        """
+        # We find index of class separation
+        i = 0
+        while t[i][0] == 0:
+            i += 1
+
+        if axe is not None:
+            axe.scatter(X[0:i, 0], X[0:i, 1], edgecolors='k')
+            axe.scatter(X[i:, 0], X[i:, 1], edgecolors='k')
+        else:
+            plt.scatter(X[0:i, 0], X[0:i, 1], edgecolors='k')
+            plt.scatter(X[i:, 0], X[i:, 1], edgecolors='k')
+            plt.show()
+            plt.close()
+
+    @staticmethod
+    def plot_feature_distribution(X, t, axes=None):
+
+        """
+        Shows an histogram of the feature distribution X
+
+        :param X: N x 2 numpy array
+        """
+        # We find index of class separation
+        i = 0
+        while t[i][0] == 0:
+            i += 1
+
+        if axes is None:
+            fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(6, 3))
+            show = True
+
+        else:
+            show = False
+
+        axes[0].hist(X[0:i, 0], alpha=0.5, label='0')
+        axes[0].hist(X[i:, 0], alpha=0.5, label='1')
+        axes[0].legend(loc='upper right')
+        axes[0].set_title('X distributions')
+
+        axes[1].hist(X[0:i, 1], alpha=0.5, label='0')
+        axes[1].hist(X[i:, 1], alpha=0.5, label='1')
+        axes[1].legend(loc='upper right')
+        axes[1].set_title('Y distributions')
+
+        if show:
+            plt.show()
+            plt.close()
+
+    @staticmethod
+    def distribution_and_labels(X, t, title=None):
+
+        """
+        Plots a figure with both feature distribution and labels
+
+        :param X: N x 1 numpy array
+        :param t: N x 1 numpy array
+        :param title: plot title
+        """
+
+        fig, axes = plt.subplots(nrows=1, ncols=4, figsize=(10, 3))
+
+        if title is not None:
+            fig.suptitle(title)
+
+        # Labels
+        TwoClusterGenerator.plot_labels(X, t, axe=axes[0])
+        axes[0].set_title('Labels')
+
+        # Histogram
+        TwoClusterGenerator.plot_feature_distribution(X, t, axes=[axes[1], axes[2]])
+
+        # Bar plot
+        axes[3].bar(x=[0, 1], height=[(t == 0).sum(), (t == 1).sum()], color=['C0', 'C1'], edgecolor='k')
+        axes[3].set_title('Count')
+
+        fig.tight_layout()
+        plt.show()
+        plt.close()
+
+
+
+
+
+
 
 
 
