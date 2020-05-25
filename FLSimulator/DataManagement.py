@@ -65,20 +65,13 @@ class OneDimensionalDG:
         :param X: N x 1 numpy array
         :param t: N x 1 numpy array
         :param add_ground_truth: bool indicating if we should plot function used to generate labels
+
         """
 
-        if add_ground_truth:
-            X_sample = np.linspace(0, 1, 500)
-            X_sample.resize((500, 1))
-            t_sample = self.label_function(X_sample)
-            plt.plot(X_sample, t_sample)
+        raise NotImplementedError
 
-        plt.plot(X, t, 'ro')
-        plt.show()
-        plt.close()
-
-    def distribution_and_labels(self, X, t, title=None):
-
+    @staticmethod
+    def distribution_and_labels(X, t, title=None):
         """
         Plots a figure with both feature distribution and labels
 
@@ -87,23 +80,23 @@ class OneDimensionalDG:
         :param title: plot title
         """
 
-        fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(5, 3))
+        raise NotImplementedError
 
-        if title is not None:
-            fig.suptitle(title)
+    def plot_ground_truth(self):
 
-        axes[0].plot(X, t, 'ro')
-        axes[0].set_title('Labels')
-        axes[1].hist(X)
-        axes[1].set_title('Feature Distribution')
-        fig.tight_layout()
-        plt.show()
-        plt.close()
+        """
+        Plots the ground truth curve used to generate labels
+
+        """
+        X_sample = np.linspace(0, 1, 500)
+        X_sample.resize((500, 1))
+        t_sample = self.label_function(X_sample)
+        plt.plot(X_sample, t_sample, 'k')
 
 
 class OneDimensionalRDG(OneDimensionalDG):
 
-    def __init__(self, noise=0, a=1, b=1, label_function='linear'):
+    def __init__(self, noise=0.10, a=1, b=1, label_function='linear'):
 
         """
         One Dimensional Regression Data Generator
@@ -175,6 +168,47 @@ class OneDimensionalRDG(OneDimensionalDG):
 
         return f
 
+    def plot_labels(self, X, t, add_ground_truth=False):
+
+        """
+        Plots the labels point (x_n, t_n)
+
+        :param X: N x 1 numpy array
+        :param t: N x 1 numpy array
+        :param add_ground_truth: bool indicating if we should plot function used to generate labels
+        """
+
+        if add_ground_truth:
+            self.plot_ground_truth()
+
+        plt.plot(X, t, 'ro')
+        plt.show()
+        plt.close()
+
+    @staticmethod
+    def distribution_and_labels(X, t, title=None):
+
+        """
+        Plots a figure with both feature distribution and labels
+
+        :param X: N x 1 numpy array
+        :param t: N x 1 numpy array
+        :param title: plot title
+        """
+
+        fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(5, 3))
+
+        if title is not None:
+            fig.suptitle(title)
+
+        axes[0].plot(X, t, 'ro')
+        axes[0].set_title('Labels')
+        axes[1].hist(X)
+        axes[1].set_title('Feature Distribution')
+        fig.tight_layout()
+        plt.show()
+        plt.close()
+
 
 class OneDimensionalLRDG(OneDimensionalDG):
 
@@ -241,6 +275,48 @@ class OneDimensionalLRDG(OneDimensionalDG):
 
         return features, labels
 
+    def plot_labels(self, X, t, add_ground_truth=False):
+
+        """
+        Plots the labels point (x_n, t_n)
+
+        :param X: N x 1 numpy array
+        :param t: N x 1 numpy array
+        :param add_ground_truth: bool indicating if we should plot function used to generate labels
+        """
+
+        if add_ground_truth:
+            self.plot_ground_truth()
+
+        plt.scatter(X, t, c=t, edgecolors='k', cmap='bwr')
+        plt.show()
+        plt.close()
+
+    @staticmethod
+    def distribution_and_labels(X, t, title=None):
+
+        """
+        Plots a figure with both feature distribution and labels
+
+        :param X: N x 1 numpy array
+        :param t: N x 1 numpy array
+        :param title: plot title
+        """
+
+        fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(6, 3))
+
+        if title is not None:
+            fig.suptitle(title)
+
+        axes[0].scatter(X, t, c=t, edgecolors='k', cmap='bwr')
+        axes[0].set_title('Labels')
+        axes[1].hist(X)
+        axes[1].set_title('Feature Distribution')
+        axes[2].bar(x=[0, 1], height=[(t == 0).sum(), (t == 1).sum()], color=['blue', 'red'], edgecolor='k')
+        axes[2].set_title('Count')
+        fig.tight_layout()
+        plt.show()
+        plt.close()
 
 
 

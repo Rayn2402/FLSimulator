@@ -60,7 +60,7 @@ class FederatedNetwork:
         self.server.init_global_model_weights(self.nodes)
         self.server.copy_global_model(self.nodes)
 
-    def run_learning(self, nb_of_rounds=1, show_round_results=(False, 0, 1)):
+    def run_learning(self, nb_of_rounds=1, show_round_results=False):
 
         """
         Run the federated learning
@@ -71,18 +71,16 @@ class FederatedNetwork:
 
         for i in range(nb_of_rounds):
             self.server.train(self.nodes)
-            if show_round_results[0]:
-                self.global_accuracy(show_round_results[1], show_round_results[2], title='Round ' + str(i + 1))
+            if show_round_results:
+                self.global_accuracy(title='Round ' + str(i + 1))
 
-    def global_accuracy(self, start, stop, title=None):
+    def global_accuracy(self, title=None):
 
         """
         Plots the model result over the complete network dataset
         Only available if the model as the function plot_model implemented (1-D or 2-D model)
 
-        :param start: start on x-axis
-        :param stop: stop on x-axis
         :param title: title of the figure
         """
 
-        self.server.plot_global_accuracy(self.nodes, start, stop, title)
+        self.server.plot_global_accuracy(self.nodes, title)

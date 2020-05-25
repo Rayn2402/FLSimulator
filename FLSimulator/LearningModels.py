@@ -168,25 +168,17 @@ class LinearModel:
         """
         return NotImplementedError
 
-    def plot_model(self, X, t, start, stop, title=None):
+    def plot_model(self, X, t, title=None):
 
         """
-        Plot the curve prediction of our model (only available with 1-D feature space)
+        Plot the curve prediction of our model
+
         :param X: N x 1 numpy array with training data
         :param t: 1 x N numpy array with training labels
-        :param start: starting point on x-axis
-        :param stop: ending point on x-axis
         :param title: title of the figure
         :return:
         """
-        x_sample = np.arange(start, stop, 0.01)
-        t_sample = [self.predict(np.array([[x]])) for x in x_sample]
-        plt.plot(X, t, 'ro')
-        plt.plot(x_sample, t_sample, 'k')
-        if title is not None:
-            plt.title(title)
-        plt.show()
-        plt.close()
+        raise NotImplementedError
 
 
 class GDRegressor(LinearModel):
@@ -262,6 +254,28 @@ class GDRegressor(LinearModel):
         copy.w = deepcopy(self.w)
 
         return copy
+
+    def plot_model(self, X, t, title=None):
+
+        """
+        Plot the curve prediction of our model (only available with 1-D feature space)
+
+        :param X: N x 1 numpy array with training data
+        :param t: 1 x N numpy array with training labels
+        :param title: title of the figure
+        :return:
+        """
+        if X.shape[1] > 1:
+            raise Exception('This function only accept feature spaces that are 1-D')
+
+        x_sample = np.arange(X[:, 0].min(), X[:, 0].max(), 0.01)
+        t_sample = [self.predict(np.array([[x]])) for x in x_sample]
+        plt.plot(X, t, 'ro')
+        plt.plot(x_sample, t_sample, 'k')
+        if title is not None:
+            plt.title(title)
+        plt.show()
+        plt.close()
 
 
 class LogisticRegressor(LinearModel):
@@ -341,6 +355,47 @@ class LogisticRegressor(LinearModel):
         copy.w = deepcopy(self.w)
 
         return copy
+
+    def plot_model(self, X, t, title=None):
+
+        """
+        Plot the curve prediction of our model (only available with 1-D or 2-D feature space)
+
+        :param X: N x 1 numpy array with training data
+        :param t: 1 x N numpy array with training labels
+        :param title: title of the figure
+        """
+        if X.shape[1] > 2:
+            raise Exception('This function only accept feature spaces that are 1-D or 2-D')
+
+        # Points sampling for curve drawing
+        x_sample = np.arange(X[:, 0].min(), X[:, 0].max(), 0.01)
+        t_sample = [self.predict(np.array([[x]])) for x in x_sample]
+
+        # Predictions of actual dataset
+        predictions = [self.predict(X[n:n+1]) for n in range(X.shape[0])]
+
+        # Curve drawing
+        plt.plot(x_sample, t_sample, 'k')
+
+        # Ground-truth points
+        plt.scatter(X, predictions, c=t, edgecolors='k', cmap='bwr')
+
+        if title is not None:
+            plt.title(title)
+
+        plt.show()
+        plt.close()
+
+
+
+
+
+
+
+
+
+
 
 
 

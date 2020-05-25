@@ -117,23 +117,16 @@ class CentralServer:
         feature_size = self.global_model.phi(input_sample).shape[1]
         self.global_model.init_weight(feature_size)
 
-    def plot_global_accuracy(self, node_list, start, stop, title=None):
+    def plot_global_accuracy(self, node_list, title=None):
 
         """
         Plots the model result over the complete network dataset
         Only available if the model as the function plot_model implemented (1-D or 2-D model)
 
         :param node_list: list of nodes
-        :param start: start on x-axis
-        :param stop: stop on x-axis
         :param title: title of the figure
         """
-        X_total = node_list[0].X
-        t_total = node_list[0].t
-
-        for node in node_list[1:]:
-            X_total = np.append(X_total, node.X, axis=0)
-            t_total = np.append(t_total, node.t, axis=0)
+        X_total, t_total = regroup_data_base(node_list)
 
         loss = round(self.global_model.loss(X_total, t_total), 2)
 
@@ -142,5 +135,25 @@ class CentralServer:
         else:
             title += ' - Loss ' + str(loss)
 
-        self.global_model.plot_model(X_total, t_total, start, stop, title)
+        self.global_model.plot_model(X_total, t_total, title)
+
+
+def regroup_data_base(node_list):
+
+    """
+    Regroups all data base of the different Nodes into a single data base
+
+    :param node_list: list of Nodes
+    :return: X, t : numpy array
+    """
+
+    X_total = node_list[0].X
+    t_total = node_list[0].t
+
+    if len(node_list) >= 1:
+        for node in node_list[1:]:
+            X_total = np.append(X_total, node.X, axis=0)
+            t_total = np.append(t_total, node.t, axis=0)
+
+    return X_total, t_total
 
