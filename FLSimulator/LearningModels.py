@@ -2,9 +2,9 @@
     File containing all code related to machine learning models available for federated learning simulation
 
     NOTE :
-            - L indicates the original dimension of feature vectors include in database X
+            - L indicates the original dimension of feature vectors include in Xbase X
             - M indicates the dimension of new feature vectors returned by phi
-            - N indicates the number of feature vectors in the database X
+            - N indicates the number of feature vectors in the Xbase X
 
 """
 
@@ -23,7 +23,7 @@ class LinearModel:
         """
         Linear Machine Learning Models
 
-        :param phi: basis function applied to training data
+        :param phi: basis function applied to training X
         :param M: dimension of the feature vector returned by phi (including bias)
         :param eta0: learning rate initial value in the training
         :param learning_rate: learning rate schedule
@@ -80,7 +80,7 @@ class LinearModel:
         """
         Train our linear model
 
-        :param X: N x L numpy array with training data (L --> original number of feature)
+        :param X: N x L numpy array with training X (L --> original number of feature)
         :param t: N x 1 numpy array with training labels
         :param minibatch_size: size of minibatches used is gradient descent
         :param weight_init: Starting point of SGD in weight space (default = self.w)
@@ -94,7 +94,7 @@ class LinearModel:
         # Weight ignition if not done yet
         if self.w is None:
 
-            # We compute feature size applying phi function on first vector in dataset X
+            # We compute feature size applying phi function on first vector in Xset X
             feature_size = self.phi(X[0:1]).shape[1]
             self.init_weight(feature_size)
 
@@ -103,7 +103,7 @@ class LinearModel:
         eta0 = self.eta
         last_loss = self.loss(X, t)
 
-        # Data Shuffling
+        # X Shuffling
         X, t = shuffle(X, t)
 
         # Weights optimization
@@ -131,7 +131,7 @@ class LinearModel:
         """
         Compute the loss associated with our current model
 
-         :param X: N x L numpy array with training data (L --> original number of feature)
+         :param X: N x L numpy array with training X (L --> original number of feature)
         :param t: N x 1 numpy array with training labels
         :return: float
         """
@@ -173,7 +173,7 @@ class LinearModel:
         """
         Plot the curve prediction of our model
 
-        :param X: N x 1 numpy array with training data
+        :param X: N x 1 numpy array with training X
         :param t: 1 x N numpy array with training labels
         :param title: title of the figure
         :return:
@@ -188,7 +188,7 @@ class GDRegressor(LinearModel):
         """
         Linear Regression Machine Learning Models that trains with Gradient Descent
 
-        :param phi: basis function applied to training data
+        :param phi: basis function applied to training X
         :param M: dimension of the feature vector returned by phi (including bias)
         :param eta0: learning rate initial value in the training
         :param learning_rate: learning rate schedule
@@ -230,7 +230,7 @@ class GDRegressor(LinearModel):
         """
         Compute the least square loss associated with our current model
 
-        :param X: N x L numpy array with training data (L --> original number of feature)
+        :param X: N x L numpy array with training X (L --> original number of feature)
         :param t: N x 1 numpy array with training labels
         :param return_predictions: bool that indicates if we returned the numpy array of predictions
         :return: float
@@ -260,7 +260,7 @@ class GDRegressor(LinearModel):
         """
         Plot the curve prediction of our model (only available with 1-D feature space)
 
-        :param X: N x 1 numpy array with training data
+        :param X: N x 1 numpy array with training X
         :param t: 1 x N numpy array with training labels
         :param title: title of the figure
         :return:
@@ -270,7 +270,7 @@ class GDRegressor(LinearModel):
 
         x_sample = np.arange(X[:, 0].min(), X[:, 0].max(), 0.01)
         t_sample = [self.predict(np.array([[x]])) for x in x_sample]
-        plt.plot(X, t, 'ro')
+        plt.plot(X, t, 'o')
         plt.plot(x_sample, t_sample, 'k')
         if title is not None:
             plt.title(title)
@@ -282,10 +282,9 @@ class LogisticRegressor(LinearModel):
 
     def __init__(self, phi, eta0=1, learning_rate='invscaling'):
         """
-        SGD Linear Regression Machine Learning Models
+        SGD Logistic Regression Machine Learning Models for 2D classification
 
-        :param phi: basis function applied to training data
-        :param M: dimension of the feature vector returned by phi (including bias)
+        :param phi: basis function applied to training X
         :param eta0: learning rate initial value in the training
         :param learning_rate: learning rate schedule
         """
@@ -307,7 +306,7 @@ class LogisticRegressor(LinearModel):
         minibatch_size = X_k.shape[0]
 
         for n in range(minibatch_size):
-            weight_sum += (self.predict(X_k[n:n + 1]) - t_k[n:n + 1][0][0]) * self.phi(X_k[n:n + 1]).transpose()
+            weight_sum += (t_k[n:n + 1][0][0] - self.predict(X_k[n:n + 1])) * self.phi(X_k[n:n + 1]).transpose()
 
         self.w = self.w + self.eta * (1 / minibatch_size) * weight_sum
 
@@ -319,14 +318,14 @@ class LogisticRegressor(LinearModel):
         :param x: 1 x M numpy array
         :return: predicted probability
         """
-        return 1 / (1 + np.exp(np.dot(self.phi(x), self.w)[0][0]))
+        return 1 / (1 + np.exp(-1*np.dot(self.phi(x), self.w)[0][0]))
 
     def loss(self, X, t, return_predictions=False):
 
         """
         Computes the cross-entropy loss associated with our current model
 
-        :param X: N x L numpy array with training data (L --> original number of feature)
+        :param X: N x L numpy array with training X (L --> original number of feature)
         :param t: N x 1 numpy array with training labels
         :param return_predictions: bool that indicates if we returned the numpy array of predictions
         :return: float
@@ -360,46 +359,126 @@ class LogisticRegressor(LinearModel):
 
         """
         Plot the curve prediction of our model (only available with 1-D or 2-D feature space)
+        The x-axis labels will be associated to w^t * phi(x)
 
-        :param X: N x 1 numpy array with training data
-        :param t: 1 x N numpy array with training labels
+        :param X: N x 1 or N x 2 numpy array with training X
+        :param t: N x 1 numpy array with training labels
         :param title: title of the figure
         """
         if X.shape[1] > 2:
             raise Exception('This function only accept feature spaces that are 1-D or 2-D')
 
-        # Points sampling for curve drawing
-        x_sample = np.arange(X[:, 0].min(), X[:, 0].max(), 0.01)
-        t_sample = [self.predict(np.array([[x]])) for x in x_sample]
+        # We make a copy of data with label added as a column
+        a = np.hstack((X, t))
+        a = a[a[:, X.shape[1]].argsort()]
 
-        # Predictions of actual dataset
-        predictions = [self.predict(X[n:n+1]) for n in range(X.shape[0])]
+        # We find index of class separation
+        i = 0
+        while a[i][X.shape[1]] == 0:
+            i += 1
 
-        # Curve drawing
-        plt.plot(x_sample, t_sample, 'k')
+        if X.shape[1] == 1:
 
-        # Ground-truth points
-        plt.scatter(X, predictions, c=t, edgecolors='k', cmap='bwr')
+            # Points sampling for curve drawing
+            x_sample = np.arange(a[:, 0].min(), a[:, 0].max(), 0.01)
+            t_sample = [self.predict(np.array([[x]])) for x in x_sample]
 
-        if title is not None:
-            plt.title(title)
+            # x axis labels for sample (w_transpose * phi(x))
+            x_sample_label = np.array([np.dot(self.phi(np.array([[x]])), self.w)[0][0] for x in x_sample])
+
+            # Predictions of actual X dataset
+            predictions = [self.predict(a[n:n + 1, [0]]) for n in range(X.shape[0])]
+
+            # x axis labels computation for original data (w_transpose * phi(x))
+            for n in range(a.shape[0]):
+                a[n][0] = np.dot(self.phi(a[n:n+1, [0]]), self.w)[0][0]
+
+            # Curve drawing
+            plt.plot(x_sample_label, t_sample, 'k')
+
+            # Ground-truth points
+            plt.scatter(a[:i, 0], predictions[:i], edgecolors='k', label='0')
+            plt.scatter(a[i:, 0], predictions[i:], edgecolors='k', label='1')
+
+            # Axes config
+            plt.legend(loc='upper left')
+            plt.rc('text', usetex=True)
+            plt.xlabel(r'$w^t \phi(x)$')
+            plt.ylabel(r'$\sigma(w^t \phi(x))$')
+
+            if title is not None:
+                plt.title(title)
+
+        else:
+
+            fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(6, 3.5))
+
+            # 1 - Class Separation
+
+            # Points sampling for class contour drawing
+            x_min, x_max = X[:, 0].min(), X[:, 0].max()
+            y_min, y_max = X[:, 1].min(), X[:, 1].max()
+            x = np.arange(x_min, x_max, 0.02)
+            y = np.arange(y_min, y_max, 0.02)
+
+            # Generations of all possible pairs among x and y
+            xx, yy = np.meshgrid(x, y)
+            x_vis = np.hstack([xx.reshape((-1, 1)), yy.reshape((-1, 1))])
+
+            # Contour class coloring
+            contour_out_pred = np.array([self.predict(x_vis[n:n+1]) for n in range(x_vis.shape[0])])
+            contour_out = np.round(contour_out_pred)
+            contour_out = contour_out.reshape(xx.shape)
+
+            # We draw class separation in second subplot
+            axes[1].contourf(xx, yy, contour_out, colors=('C0', 'k', 'C1', 'k'))
+            axes[1].scatter(a[:i, 0], a[:i, 1], edgecolors='k')
+            axes[1].scatter(a[i:, 0], a[i:, 1], edgecolors='k')
+
+            # Axe configuration
+            axes[1].set_xlim(x_min, x_max)
+            axes[1].set_ylim(y_min, y_max)
+            axes[1].set_title('Decision Boundary')
+
+            # 2 - Prediction Curve
+
+            # Curve data (numpy array of shape N X 2 with each component like [(w_transpose * phi(x)), class label])
+            curve_data = np.array([np.dot(self.phi(x_vis[n:n+1]), self.w)[0][0] for n in range(x_vis.shape[0])])
+            curve_data.resize((x_vis.shape[0], 1))
+            contour_out_pred.resize((x_vis.shape[0], 1))
+            curve_data = np.hstack((curve_data, contour_out_pred))
+            curve_data = curve_data[curve_data[:, 1].argsort()]
+
+            # We draw prediction curve
+            axes[0].plot(curve_data[:, 0], curve_data[:, 1], 'k')
+
+            # We add dots on curve
+            for n in range(a.shape[0]):
+
+                # We compute labels (w_transpose * phi(x))
+                new_x = np.dot(self.phi(a[n:n + 1, [0, 1]]), self.w)[0][0]
+                a[n][1] = self.predict(a[n:n+1, [0, 1]])
+                a[n][0] = new_x
+
+            a = a[:, [0, 1]]
+
+            axes[0].scatter(a[:i, 0], a[:i, 1], edgecolors='k', label='0')
+            axes[0].scatter(a[i:, 0], a[i:, 1], edgecolors='k', label='1')
+
+            # Axe configuration
+            plt.rc('text', usetex=True)
+            axes[0].set_title('Predictions')
+            axes[0].legend(loc='lower right')
+            axes[0].set_xlabel(r'$w^t \phi(x)$')
+            axes[0].set_ylabel(r'$\sigma(w^t \phi(x))$')
+
+            if title is not None:
+                fig.suptitle(title)
+
+            fig.tight_layout(h_pad=5, pad=3)
 
         plt.show()
         plt.close()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
