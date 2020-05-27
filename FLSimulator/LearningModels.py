@@ -468,7 +468,7 @@ class LogisticRegressor(LinearModel):
             # Axe configuration
             plt.rc('text', usetex=True)
             axes[0].set_title('Predictions')
-            axes[0].legend(loc='lower right')
+            axes[0].legend(loc='upper left')
             axes[0].set_xlabel(r'$w^t \phi(x)$')
             axes[0].set_ylabel(r'$\sigma(w^t \phi(x))$')
 
