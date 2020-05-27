@@ -333,7 +333,7 @@ class OneDimensionalLRDG(OneDimensionalDG):
         axes[2].bar(x=[0, 1], height=[(t == 0).sum(), (t == 1).sum()], color=['C0', 'C1'], edgecolor='k')
         axes[2].set_title('Count')
 
-        fig.tight_layout()
+        fig.tight_layout(pad=3, h_pad=4)
         plt.show()
         plt.close()
 
@@ -372,17 +372,21 @@ class TwoClusterGenerator:
         :param t: N x 1 numpy array
 
         """
+        # We make a copy of data with label added as a column
+        a = np.hstack((X, t))
+        a = a[a[:, 2].argsort()]
+
         # We find index of class separation
         i = 0
-        while t[i][0] == 0:
+        while a[i][2] == 0:
             i += 1
 
         if axe is not None:
-            axe.scatter(X[0:i, 0], X[0:i, 1], edgecolors='k')
-            axe.scatter(X[i:, 0], X[i:, 1], edgecolors='k')
+            axe.scatter(a[0:i, 0], a[0:i, 1], edgecolors='k')
+            axe.scatter(a[i:, 0], a[i:, 1], edgecolors='k')
         else:
-            plt.scatter(X[0:i, 0], X[0:i, 1], edgecolors='k')
-            plt.scatter(X[i:, 0], X[i:, 1], edgecolors='k')
+            plt.scatter(a[0:i, 0], a[0:i, 1], edgecolors='k')
+            plt.scatter(a[i:, 0], a[i:, 1], edgecolors='k')
             plt.show()
             plt.close()
 
@@ -394,9 +398,14 @@ class TwoClusterGenerator:
 
         :param X: N x 2 numpy array
         """
+
+        # We make a copy of data with label added as a column
+        a = np.hstack((X, t))
+        a = a[a[:, 2].argsort()]
+
         # We find index of class separation
         i = 0
-        while t[i][0] == 0:
+        while a[i][2] == 0:
             i += 1
 
         if axes is None:
@@ -406,13 +415,13 @@ class TwoClusterGenerator:
         else:
             show = False
 
-        axes[0].hist(X[0:i, 0], alpha=0.5, label='0')
-        axes[0].hist(X[i:, 0], alpha=0.5, label='1')
+        axes[0].hist(a[0:i, 0], alpha=0.5, label='0')
+        axes[0].hist(a[i:, 0], alpha=0.5, label='1')
         axes[0].legend(loc='upper right')
         axes[0].set_title('X distributions')
 
-        axes[1].hist(X[0:i, 1], alpha=0.5, label='0')
-        axes[1].hist(X[i:, 1], alpha=0.5, label='1')
+        axes[1].hist(a[0:i, 1], alpha=0.5, label='0')
+        axes[1].hist(a[i:, 1], alpha=0.5, label='1')
         axes[1].legend(loc='upper right')
         axes[1].set_title('Y distributions')
 
