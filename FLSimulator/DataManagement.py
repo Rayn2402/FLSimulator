@@ -341,12 +341,14 @@ class OneDimensionalLRDG(OneDimensionalDG):
 class TwoClusterGenerator:
 
     @staticmethod
-    def generate_data(sample_sizes, centers=[[0, 0.5], [1, 0.5]], std_devs=[[0.10, 0.10], [0.10, 0.10]]):
+    def generate_data(sample_sizes, centers, covs):
 
         """
         Generates the clusters
 
         :param sample_sizes: list with number of samples to produce for each class
+        :param centers: list with two 1x2 numpy arrays representing mean of both class distributions
+        :param covs: list with two 2x2 numpy array representing covariance matrix of both distribution
 
         :return:
 
@@ -354,10 +356,16 @@ class TwoClusterGenerator:
         if len(sample_sizes) != 2:
             raise Exception("size of argument does not match with the number of classes")
 
-        X = multivariate_normal.rvs(centers[0], std_devs[0], size=sample_sizes[0])
+        X = multivariate_normal.rvs(mean=centers[0],
+                                    cov=covs[0],
+                                    size=sample_sizes[0])
+
         t = np.zeros((sample_sizes[0], 1))
 
-        X = np.append(X, multivariate_normal.rvs(centers[1], std_devs[1], size=sample_sizes[1]), axis=0)
+        X = np.append(X, multivariate_normal.rvs(mean=centers[1],
+                                                 cov=covs[1],
+                                                 size=sample_sizes[1]), axis=0)
+
         t = np.append(t, np.ones((sample_sizes[1], 1)), axis=0)
 
         return X, t
