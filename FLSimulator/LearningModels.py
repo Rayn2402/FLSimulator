@@ -318,6 +318,7 @@ class LogisticRegressor(LinearModel):
         :param x: 1 x M numpy array
         :return: predicted probability
         """
+
         return 1 / (1 + np.exp(-1*np.dot(self.phi(x), self.w)[0][0]))
 
     def loss(self, X, t, return_predictions=False):
@@ -332,7 +333,6 @@ class LogisticRegressor(LinearModel):
         """
 
         errors = []
-
         for n in range(X.shape[0]):
 
             t_n = t[n:n+1][0][0]
@@ -383,9 +383,6 @@ class LogisticRegressor(LinearModel):
             x_sample = np.arange(a[:, 0].min(), a[:, 0].max(), 0.01)
             t_sample = [self.predict(np.array([[x]])) for x in x_sample]
 
-            # x axis labels for sample (w_transpose * phi(x))
-            x_sample_label = np.array([np.dot(self.phi(np.array([[x]])), self.w)[0][0] for x in x_sample])
-
             # Predictions of actual X dataset
             predictions = [self.predict(a[n:n + 1, [0]]) for n in range(X.shape[0])]
 
@@ -393,12 +390,9 @@ class LogisticRegressor(LinearModel):
             for n in range(a.shape[0]):
                 a[n][0] = np.dot(self.phi(a[n:n+1, [0]]), self.w)[0][0]
 
-            # Curve drawing
-            plt.plot(x_sample_label, t_sample, 'k')
-
-            # Ground-truth points
-            plt.scatter(a[:i, 0], predictions[:i], edgecolors='k', label='0')
-            plt.scatter(a[i:, 0], predictions[i:], edgecolors='k', label='1')
+            # Ground-truth points and their predictions
+            plt.scatter(a[:i, 0], predictions[:i], edgecolors='k', label='0', alpha=0.5)
+            plt.scatter(a[i:, 0], predictions[i:], edgecolors='k', label='1', alpha=0.5)
 
             # Axes config
             plt.legend(loc='upper left')
@@ -440,30 +434,18 @@ class LogisticRegressor(LinearModel):
             axes[1].set_ylim(y_min, y_max)
             axes[1].set_title('Decision Boundary')
 
-            # 2 - Prediction Curve
-
-            # Curve data (numpy array of shape N X 2 with each component like [(w_transpose * phi(x)), class label])
-            curve_data = np.array([np.dot(self.phi(x_vis[n:n+1]), self.w)[0][0] for n in range(x_vis.shape[0])])
-            curve_data.resize((x_vis.shape[0], 1))
-            contour_out_pred.resize((x_vis.shape[0], 1))
-            curve_data = np.hstack((curve_data, contour_out_pred))
-            curve_data = curve_data[curve_data[:, 1].argsort()]
-
-            # We draw prediction curve
-            axes[0].plot(curve_data[:, 0], curve_data[:, 1], 'k')
-
-            # We add dots on curve
+            # 2 - Predictions of actual X dataset
             for n in range(a.shape[0]):
 
-                # We compute labels (w_transpose * phi(x))
+                # We compute labels (w_transpose * phi(x)) and prediction associated to it
                 new_x = np.dot(self.phi(a[n:n + 1, [0, 1]]), self.w)[0][0]
                 a[n][1] = self.predict(a[n:n+1, [0, 1]])
                 a[n][0] = new_x
 
             a = a[:, [0, 1]]
 
-            axes[0].scatter(a[:i, 0], a[:i, 1], edgecolors='k', label='0')
-            axes[0].scatter(a[i:, 0], a[i:, 1], edgecolors='k', label='1')
+            axes[0].scatter(a[:i, 0], a[:i, 1], edgecolors='k', label='0', alpha=0.5)
+            axes[0].scatter(a[i:, 0], a[i:, 1], edgecolors='k', label='1', alpha=0.5)
 
             # Axe configuration
             plt.rc('text', usetex=True)
