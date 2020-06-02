@@ -331,7 +331,9 @@ class OneDimensionalLRDG(OneDimensionalDG):
 
         # Bar plot
         axes[2].bar(x=[0, 1], height=[(t == 0).sum(), (t == 1).sum()], color=['C0', 'C1'], edgecolor='k')
+        axes[2].set_xticks([0, 1])
         axes[2].set_title('Count')
+
 
         fig.tight_layout(pad=3, h_pad=4)
         plt.show()
@@ -462,6 +464,7 @@ class TwoClusterGenerator:
 
         # Bar plot
         axes[3].bar(x=[0, 1], height=[(t == 0).sum(), (t == 1).sum()], color=['C0', 'C1'], edgecolor='k')
+        axes[3].set_xticks([0, 1])
         axes[3].set_title('Count')
 
         fig.tight_layout()
