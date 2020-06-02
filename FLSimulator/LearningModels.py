@@ -337,7 +337,17 @@ class LogisticRegressor(LinearModel):
 
             t_n = t[n:n+1][0][0]
             y_n = self.predict(X[n:n+1])
-            error = t_n*np.log(y_n) + (1-t_n)*np.log(1-y_n)
+
+            # error = t_n*np.log(y_n) + (1-t_n)*np.log(1-y_n)
+            if t_n == 1:
+                error = np.log(y_n)
+
+            elif t_n == 0:
+                error = np.log(1-y_n)
+
+            else:
+                raise Exception('Label Error')
+
             errors.append(error)
 
         errors = np.array(errors)
