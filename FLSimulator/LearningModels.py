@@ -101,7 +101,7 @@ class LinearModel:
         # Variable ignition
         nb_minibatch = int(np.ceil(X.shape[0]/minibatch_size))
         eta0 = self.eta
-        last_loss = self.loss(X, t)
+        last_loss = float('inf')
 
         # X Shuffling
         X, t = shuffle(X, t)
