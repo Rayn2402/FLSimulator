@@ -126,16 +126,37 @@ class CentralServer:
         :param node_list: list of nodes
         :param title: title of the figure
         """
-        X_total, t_total = regroup_data_base(node_list)
 
-        loss = round(self.global_model.loss(X_total, t_total), 2)
+        loss, X_total, t_total = self.global_loss(node_list, grouped_data=True)
 
         if title is None:
             title = 'Loss : ' + str(loss)
         else:
-            title += ' - Loss ' + str(loss)
+            title += ' - Loss : ' + str(loss)
 
         self.global_model.plot_model(X_total, t_total, title)
+
+        return loss
+
+    def global_loss(self, node_list, grouped_data=False):
+
+        """
+        Computes the sum of local loss of different models and loss of global model among all nodes dataset
+
+        :param node_list: list of nodes
+        :return: weighted loss and total loss
+        """
+        # We compute the total sample size
+        N = sum([node.n for node in node_list])
+
+        # We compute sum of global loss
+        X_total, t_total = regroup_data_base(node_list)
+        loss = round(self.global_model.loss(X_total, t_total), 2)
+
+        if grouped_data:
+            return loss, X_total, t_total
+        else:
+            return loss
 
 
 def regroup_data_base(node_list):
