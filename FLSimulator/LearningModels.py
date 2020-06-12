@@ -44,7 +44,7 @@ class LinearModel:
     def init_weight(self, M):
 
         """
-        Init weight vector with random values
+        Initializes weight vector with random values
 
         :param M: dimensions that w vector must satisfied
         :return: M X 1 numpy array
@@ -78,7 +78,7 @@ class LinearModel:
     def train(self, X, t, nb_epoch, minibatch_size=1, weight_init=None):
 
         """
-        Train our linear model
+        Trains our linear model
 
         :param X: N x L numpy array with training X (L --> original number of feature)
         :param t: N x 1 numpy array with training labels
@@ -141,7 +141,7 @@ class LinearModel:
     def predict(self, x):
 
         """
-        Predict the label for an input x
+        Predicts the label for an input x
 
         :param x: 1 x L numpy array
         :return: predicted label
@@ -171,7 +171,7 @@ class LinearModel:
     def plot_model(self, X, t, title=None):
 
         """
-        Plot the curve prediction of our model
+        Plots the curve prediction of our model
 
         :param X: N x 1 numpy array with training X
         :param t: 1 x N numpy array with training labels
@@ -217,7 +217,7 @@ class GDRegressor(LinearModel):
     def predict(self, x):
 
         """
-        Predict the label for an input x
+        Predicts the label for an input x
 
         :param x: 1 x M numpy array
         :return: predicted label
@@ -228,7 +228,7 @@ class GDRegressor(LinearModel):
     def loss(self, X, t, return_predictions=False):
 
         """
-        Compute the least square loss associated with our current model
+        Computes the least square loss associated with our current model
 
         :param X: N x L numpy array with training X (L --> original number of feature)
         :param t: N x 1 numpy array with training labels
@@ -258,7 +258,7 @@ class GDRegressor(LinearModel):
     def plot_model(self, X, t, title=None):
 
         """
-        Plot the curve prediction of our model (only available with 1-D feature space)
+        Plots the curve prediction of our model (only available with 1-D feature space)
 
         :param X: N x 1 numpy array with training X
         :param t: 1 x N numpy array with training labels
@@ -282,7 +282,7 @@ class LogisticRegressor(LinearModel):
 
     def __init__(self, phi, eta0=1, learning_rate='invscaling'):
         """
-        SGD Logistic Regression Machine Learning Models for 2D classification
+        SGD Logistic Regression Machine Learning Models for binary classification
 
         :param phi: basis function applied to training X
         :param eta0: learning rate initial value in the training
@@ -313,7 +313,7 @@ class LogisticRegressor(LinearModel):
     def predict(self, x):
 
         """
-        Predict the probability for an input x to have label 1
+        Predicts the probability for an input x to have label 1
 
         :param x: 1 x M numpy array
         :return: predicted probability
@@ -368,7 +368,7 @@ class LogisticRegressor(LinearModel):
     def plot_model(self, X, t, title=None):
 
         """
-        Plot the curve prediction of our model (only available with 1-D or 2-D feature space)
+        Plots the curve prediction of our model (only available with 1-D or 2-D feature space)
         The x-axis labels will be associated to w^t * phi(x)
 
         :param X: N x 1 or N x 2 numpy array with training X
