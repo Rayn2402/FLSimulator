@@ -117,7 +117,7 @@ class OneDimensionalRDG(OneDimensionalDG):
     def generate_data(self, N):
 
         """
-        Generate noisy labels associated with the features
+        Generates noisy labels associated with the features
 
         :param N: number of 1-D feature vector needed
         :return: N x 1 numpy array with feature vectors, N x 1 numpy array with labels
@@ -333,7 +333,6 @@ class OneDimensionalLRDG(OneDimensionalDG):
         axes[2].bar(x=[0, 1], height=[(t == 0).sum(), (t == 1).sum()], color=['C0', 'C1'], edgecolor='k')
         axes[2].set_xticks([0, 1])
         axes[2].set_title('Count')
-
 
         fig.tight_layout(pad=3, h_pad=4)
         plt.show()
