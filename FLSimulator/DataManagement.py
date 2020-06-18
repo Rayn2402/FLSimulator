@@ -374,15 +374,21 @@ class TwoClusterGenerator:
         return X, t
 
     @staticmethod
-    def plot_labels(X, t, axe=None):
+    def plot_labels(X, t, title='Labels', x1_label='$X_1$', x2_label='$X_2$', axe=None):
 
         """
         Plots the labels
 
         :param X: N x 2 numpy array
         :param t: N x 1 numpy array
-
+        :param title: plot title
+        :param x1_label: label associated to x-axis
+        :param x2_label: label associated to y-axis
+        :param axe: pyplot axe
         """
+        # Enable LaTeX
+        plt.rc('text', usetex=True)
+
         # We make a copy of data with label added as a column
         a = np.hstack((X, t))
         a = a[a[:, 2].argsort()]
@@ -393,22 +399,35 @@ class TwoClusterGenerator:
             i += 1
 
         if axe is not None:
+            axe.set_title(title)
+            axe.set_xlabel(x1_label)
+            axe.set_ylabel(x2_label)
             axe.scatter(a[0:i, 0], a[0:i, 1], edgecolors='k')
             axe.scatter(a[i:, 0], a[i:, 1], edgecolors='k')
         else:
+            plt.title(title)
+            plt.xlabel(x1_label)
+            plt.ylabel(x2_label)
             plt.scatter(a[0:i, 0], a[0:i, 1], edgecolors='k')
             plt.scatter(a[i:, 0], a[i:, 1], edgecolors='k')
             plt.show()
             plt.close()
 
     @staticmethod
-    def plot_feature_distribution(X, t, axes=None):
+    def plot_feature_distribution(X, t, x1_title='$X_1$ marginal density',
+                                  x2_title='$X_2$ marginal density', axes=None):
 
         """
         Shows an histogram of the feature distribution X
 
         :param X: N x 2 numpy array
+        :param t: N x 1 numpy array
+        :param x1_title: title of x1 feature distribution
+        :param x2_title: title of x2 feature distribution
+        :param axes: list with 2 pyplot axe
         """
+        # Enable LaTeX
+        plt.rc('text', usetex=True)
 
         # We make a copy of data with label added as a column
         a = np.hstack((X, t))
@@ -429,14 +448,15 @@ class TwoClusterGenerator:
         axes[0].hist(a[0:i, 0], alpha=0.5, label='0', density=True)
         axes[0].hist(a[i:, 0], alpha=0.5, label='1', density=True)
         axes[0].legend(loc='upper right')
-        axes[0].set_title('X1 marginal density')
+        axes[0].set_title(x1_title)
 
         axes[1].hist(a[0:i, 1], alpha=0.5, label='0', density=True)
         axes[1].hist(a[i:, 1], alpha=0.5, label='1', density=True)
         axes[1].legend(loc='upper right')
-        axes[1].set_title('X2 marginal density')
+        axes[1].set_title(x2_title)
 
         if show:
+            fig.tight_layout(h_pad=5, pad=3)
             plt.show()
             plt.close()
 
@@ -450,7 +470,10 @@ class TwoClusterGenerator:
         :param t: N x 1 numpy array
         :param title: plot title
         """
+        # Enable LaTeX
+        plt.rc('text', usetex=True)
 
+        # Set subplots
         fig, axes = plt.subplots(nrows=1, ncols=4, figsize=(10, 3))
 
         if title is not None:
@@ -458,7 +481,6 @@ class TwoClusterGenerator:
 
         # Labels
         TwoClusterGenerator.plot_labels(X, t, axe=axes[0])
-        axes[0].set_title('Labels')
 
         # Histogram
         TwoClusterGenerator.plot_feature_distribution(X, t, axes=[axes[1], axes[2]])
