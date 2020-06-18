@@ -203,9 +203,11 @@ class OneDimensionalRDG(OneDimensionalDG):
 
         axes[0].plot(X, t, 'o')
         axes[0].set_title('Labels')
+        axes[0].set_xlim(0, 1)
         axes[1].hist(X, color='C7', density=True)
         axes[1].set_title('Feature Density')
-        fig.tight_layout()
+        axes[1].set_xlim(0, 1)
+        fig.tight_layout(h_pad=5, pad=3)
         plt.show()
         plt.close()
 
@@ -427,12 +429,12 @@ class TwoClusterGenerator:
         axes[0].hist(a[0:i, 0], alpha=0.5, label='0', density=True)
         axes[0].hist(a[i:, 0], alpha=0.5, label='1', density=True)
         axes[0].legend(loc='upper right')
-        axes[0].set_title('X marginal density')
+        axes[0].set_title('X1 marginal density')
 
         axes[1].hist(a[0:i, 1], alpha=0.5, label='0', density=True)
         axes[1].hist(a[i:, 1], alpha=0.5, label='1', density=True)
         axes[1].legend(loc='upper right')
-        axes[1].set_title('Y marginal density')
+        axes[1].set_title('X2 marginal density')
 
         if show:
             plt.show()
@@ -464,7 +466,7 @@ class TwoClusterGenerator:
         # Bar plot
         axes[3].bar(x=[0, 1], height=[(t == 0).sum(), (t == 1).sum()], color=['C0', 'C1'], edgecolor='k')
         axes[3].set_xticks([0, 1])
-        axes[3].set_title('Count')
+        axes[3].set_title('Labels Count')
 
         fig.tight_layout(h_pad=5, pad=3)
         plt.show()
