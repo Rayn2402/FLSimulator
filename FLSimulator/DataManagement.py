@@ -53,7 +53,7 @@ class OneDimensionalDG:
         :param X: N x 1 numpy array
         """
 
-        plt.hist(X, color='C7')
+        plt.hist(X, color='C7', density=True)
         plt.show()
         plt.close()
 
@@ -203,8 +203,8 @@ class OneDimensionalRDG(OneDimensionalDG):
 
         axes[0].plot(X, t, 'o')
         axes[0].set_title('Labels')
-        axes[1].hist(X, color='C7')
-        axes[1].set_title('Feature Distribution')
+        axes[1].hist(X, color='C7', density=True)
+        axes[1].set_title('Feature Density')
         fig.tight_layout()
         plt.show()
         plt.close()
@@ -326,7 +326,7 @@ class OneDimensionalLRDG(OneDimensionalDG):
         axes[0].set_title('Labels')
 
         # Histogram
-        axes[1].hist(X, color='C7')
+        axes[1].hist(X, color='C7', density=True)
         axes[1].set_title('Feature Distribution')
 
         # Bar plot
@@ -424,15 +424,15 @@ class TwoClusterGenerator:
         else:
             show = False
 
-        axes[0].hist(a[0:i, 0], alpha=0.5, label='0')
-        axes[0].hist(a[i:, 0], alpha=0.5, label='1')
+        axes[0].hist(a[0:i, 0], alpha=0.5, label='0', density=True)
+        axes[0].hist(a[i:, 0], alpha=0.5, label='1', density=True)
         axes[0].legend(loc='upper right')
-        axes[0].set_title('X distributions')
+        axes[0].set_title('X marginal density')
 
-        axes[1].hist(a[0:i, 1], alpha=0.5, label='0')
-        axes[1].hist(a[i:, 1], alpha=0.5, label='1')
+        axes[1].hist(a[0:i, 1], alpha=0.5, label='0', density=True)
+        axes[1].hist(a[i:, 1], alpha=0.5, label='1', density=True)
         axes[1].legend(loc='upper right')
-        axes[1].set_title('Y distributions')
+        axes[1].set_title('Y marginal density')
 
         if show:
             plt.show()
@@ -466,7 +466,7 @@ class TwoClusterGenerator:
         axes[3].set_xticks([0, 1])
         axes[3].set_title('Count')
 
-        fig.tight_layout()
+        fig.tight_layout(h_pad=5, pad=3)
         plt.show()
         plt.close()
 
