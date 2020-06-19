@@ -374,7 +374,7 @@ class TwoClusterGenerator:
         return X, t
 
     @staticmethod
-    def plot_labels(X, t, title='Labels', x1_label='$X_1$', x2_label='$X_2$', axe=None):
+    def plot_labels(X, t, title='Labels', x1_label='$X_1$', x2_label='$X_2$', axe=None, legend=False):
 
         """
         Plots the labels
@@ -385,6 +385,7 @@ class TwoClusterGenerator:
         :param x1_label: label associated to x-axis
         :param x2_label: label associated to y-axis
         :param axe: pyplot axe
+        :param legend: bool indicating if we need the legend or not
         """
         # Enable LaTeX
         plt.rc('text', usetex=True)
@@ -402,14 +403,18 @@ class TwoClusterGenerator:
             axe.set_title(title)
             axe.set_xlabel(x1_label)
             axe.set_ylabel(x2_label)
-            axe.scatter(a[0:i, 0], a[0:i, 1], edgecolors='k')
-            axe.scatter(a[i:, 0], a[i:, 1], edgecolors='k')
+            axe.scatter(a[0:i, 0], a[0:i, 1], edgecolors='k', label='0')
+            axe.scatter(a[i:, 0], a[i:, 1], edgecolors='k', label='1')
+            if legend:
+                axe.legend(loc='upper left')
         else:
             plt.title(title)
             plt.xlabel(x1_label)
             plt.ylabel(x2_label)
-            plt.scatter(a[0:i, 0], a[0:i, 1], edgecolors='k')
-            plt.scatter(a[i:, 0], a[i:, 1], edgecolors='k')
+            plt.scatter(a[0:i, 0], a[0:i, 1], edgecolors='k', label='0')
+            plt.scatter(a[i:, 0], a[i:, 1], edgecolors='k', label='1')
+            if legend:
+                plt.legend(loc='upper left')
             plt.show()
             plt.close()
 
