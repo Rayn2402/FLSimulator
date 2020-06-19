@@ -19,18 +19,28 @@ class Node:
         """
 
         self.X, self.t = X, t
-        self.n = self.X.shape[0]
+        self.n_k = self.X.shape[0]
         self.model = None
+        self.p_k = None
         self.id = 'Node ' + str(Node.__counter)
         Node.__counter += 1
 
     def __repr__(self):
         return self.id
 
+    def set_mass(self, n):
+
+        """
+        Set the mass of the node according to the ratio n_k / n
+
+        :param n: total sample size of the entire network
+        """
+        self.p_k = self.n_k/n
+
     def update(self, E, C, w):
 
         """
-        Train the node's model with local database
+        Trains the node's model with local database
 
         :param E: number of epochs to execute
         :param C: batch size during training
@@ -55,15 +65,22 @@ class FederatedNetwork:
 
         """
 
+        # We set the central server and the nodes
         self.server = central_server
+        self.server.set_node_number(node_list)
         self.nodes = node_list
+
+        # We init the global model and copy it in all nodes
         self.server.init_global_model_weights(self.nodes)
         self.server.copy_global_model(self.nodes)
+
+        # We set nodes masses
+        self.__set_nodes_masses(node_list)
 
     def run_learning(self, nb_of_rounds=1, show_round_results=False, loss_progress=False):
 
         """
-        Run the federated learning
+        Runs the federated learning
 
         :param nb_of_rounds: Rounds of federated learning to do
         :param show_round_results: bool indicating if we show global accuracy plot between each round
@@ -85,6 +102,24 @@ class FederatedNetwork:
 
         if loss_progress:
             return loss_progression
+
+    @staticmethod
+    def __set_nodes_masses(node_list):
+
+        """
+        Sets nodes masses according to ratio n_k / n
+
+        :param node_list: list of nodes
+
+        """
+        n = sum([node.n_k for node in node_list])
+
+        for node in node_list:
+            node.set_mass(n)
+
+
+
+
 
 
 

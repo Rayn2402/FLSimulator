@@ -31,12 +31,13 @@ class CentralServer:
         self.E = E
         self.select_nodes = self.node_selection_function(node_selection, random_size)
         self.aggregate = self.aggregation_function(aggregation)
+        self.N = None
 
     @staticmethod
     def node_selection_function(node_selection, random_size):
 
         """
-        Build the function to select node in list of nodes available
+        Builds the function to select node in list of nodes available
 
         :param node_selection: node selection choice
         :param random_size: percentage of randomly selected nodes if node selection is 'random'
@@ -61,7 +62,7 @@ class CentralServer:
     def aggregation_function(self, aggregation):
 
         """
-        Build the function to aggregate models from a list of nodes
+        Builds the function to aggregate models from a list of nodes
 
         :param aggregation: aggregation choice
         :return: function
@@ -72,19 +73,22 @@ class CentralServer:
 
         def aggregate(node_list):
 
-            # We compute the total sample size every time in case nodes are randomly sampled in each round
-            # of federated training
-            N = sum([node.n for node in node_list])
+            """
+            FedAvg as in "ON THE CONVERGENCE OF FEDAVG ON NON-IID DATA" (Li and al. 2020)
+
+            :param node_list: list of nodes
+            """
+            K = len(node_list)
 
             # We update w with a weighted average of every node models w
-            self.global_model.w = sum([(node.n/N)*node.model.w for node in node_list])
+            self.global_model.w = (self.N/K)*sum([node.p_k*node.model.w for node in node_list])
 
         return aggregate
 
     def copy_global_model(self, node_list):
 
         """
-        Copy global model in each node of the node list
+        Copies global model in each node of the node list
         Used in the initialization of a Network
 
         :param node_list: list of nodes
@@ -95,7 +99,7 @@ class CentralServer:
     def train(self, node_list):
 
         """
-        Train the global model among a list of nodes
+        Trains the global model among a list of nodes
 
         :param node_list: list of nodes
         """
@@ -130,9 +134,9 @@ class CentralServer:
         loss, X_total, t_total = self.global_loss(node_list, grouped_data=True)
 
         if title is None:
-            title = 'Loss : ' + str(loss)
+            title = 'E(w) = ' + str(loss)
         else:
-            title += ' - Loss : ' + str(loss)
+            title += ' - E(w) = ' + str(loss)
 
         self.global_model.plot_model(X_total, t_total, title)
 
@@ -146,8 +150,6 @@ class CentralServer:
         :param node_list: list of nodes
         :return: weighted loss and total loss
         """
-        # We compute the total sample size
-        N = sum([node.n for node in node_list])
 
         # We compute sum of global loss
         X_total, t_total = regroup_data_base(node_list)
@@ -158,11 +160,19 @@ class CentralServer:
         else:
             return loss
 
+    def set_node_number(self, node_list):
+
+        """
+        Set the value N of the server (number of node in the network)
+        :param node_list: list of nodes
+        """
+        self.N = len(node_list)
+
 
 def regroup_data_base(node_list):
 
     """
-    Regroups all data base of the different Nodes into a single data base
+    Regroups all databases of the different Nodes into a single data base
 
     :param node_list: list of Nodes
     :return: X, t : numpy array
