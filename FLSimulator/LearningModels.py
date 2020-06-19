@@ -442,6 +442,8 @@ class LogisticRegressor(LinearModel):
             # Axe configuration
             axes[1].set_xlim(x_min, x_max)
             axes[1].set_ylim(y_min, y_max)
+            axes[1].set_xlabel('$X_1$')
+            axes[1].set_ylabel('$X_2$')
             axes[1].set_title('Decision Boundary')
 
             # 2 - Predictions of actual X dataset
