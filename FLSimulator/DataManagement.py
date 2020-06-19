@@ -374,7 +374,7 @@ class TwoClusterGenerator:
         return X, t
 
     @staticmethod
-    def plot_labels(X, t, title='Labels', x1_label='$X_1$', x2_label='$X_2$', axe=None, legend=False):
+    def plot_labels(X, t, title='Class labels', x1_label='$X_1$', x2_label='$X_2$', axe=None, legend=False):
 
         """
         Plots the labels
@@ -419,8 +419,8 @@ class TwoClusterGenerator:
             plt.close()
 
     @staticmethod
-    def plot_feature_distribution(X, t, x1_title='$X_1$ marginal density',
-                                  x2_title='$X_2$ marginal density', axes=None):
+    def plot_feature_distribution(X, t, x1_title='$X_1$ marginal densities',
+                                  x2_title='$X_2$ marginal densities', axes=None):
 
         """
         Shows an histogram of the feature distribution X
@@ -493,7 +493,7 @@ class TwoClusterGenerator:
         # Bar plot
         axes[3].bar(x=[0, 1], height=[(t == 0).sum(), (t == 1).sum()], color=['C0', 'C1'], edgecolor='k')
         axes[3].set_xticks([0, 1])
-        axes[3].set_title('Labels Count')
+        axes[3].set_title("Labels' Count")
 
         fig.tight_layout(h_pad=5, pad=3)
         plt.show()
