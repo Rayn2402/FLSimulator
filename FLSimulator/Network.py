@@ -31,11 +31,20 @@ class Node:
     def set_mass(self, n):
 
         """
-        Set the mass of the node according to the ratio n_k / n
+        Sets the mass of the node according to the ratio n_k / n
 
         :param n: total sample size of the entire network
         """
         self.p_k = self.n_k/n
+
+    def local_loss(self):
+        """
+
+        Computes the local expected loss for the node's dataset
+
+        """
+        # Compute p_k*(1/n_k)*local loss
+        return self.p_k*(self.model.loss(self.X, self.t)/self.n_k)
 
     def update(self, E, C, w):
 
