@@ -488,16 +488,18 @@ class TwoClusterGenerator:
         TwoClusterGenerator.plot_labels(X, t, axe=axes[0])
 
         # Histogram
-        TwoClusterGenerator.plot_feature_distribution(X, t, axes=[axes[1], axes[2]])
+        TwoClusterGenerator.plot_feature_distribution(X, t, axes=[axes[2], axes[3]])
 
         # Bar plot
-        axes[3].bar(x=[0, 1], height=[(t == 0).sum(), (t == 1).sum()], color=['C0', 'C1'], edgecolor='k')
-        axes[3].set_xticks([0, 1])
-        axes[3].set_title("Labels' Count")
+        axes[1].bar(x=[0, 1], height=[(t == 0).sum(), (t == 1).sum()], color=['C0', 'C1'], edgecolor='k')
+        axes[1].set_xticks([0, 1])
+        axes[1].set_title("Labels' Count")
 
         fig.tight_layout(h_pad=5, pad=3)
         plt.show()
         plt.close()
+
+
 
 
 
