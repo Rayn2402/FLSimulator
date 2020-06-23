@@ -131,34 +131,34 @@ class CentralServer:
         :param title: title of the figure
         """
 
-        loss, X_total, t_total = self.global_loss(node_list, grouped_data=True)
+        # Loss computation
+        loss = self.global_loss(node_list)
 
         if title is None:
             title = 'E(w) = ' + str(loss)
         else:
             title += ' - E(w) = ' + str(loss)
 
+        # Plotting of the progress
+        X_total, t_total = regroup_data_base(node_list)
         self.global_model.plot_model(X_total, t_total, title)
 
         return loss
 
-    def global_loss(self, node_list, grouped_data=False):
+    def global_loss(self, node_list):
 
         """
-        Computes the sum of local loss of different models and loss of global model among all nodes dataset
+        Computes the expected loss of the distributed network
 
         :param node_list: list of nodes
         :return: weighted loss and total loss
         """
 
-        # We compute sum of global loss
-        X_total, t_total = regroup_data_base(node_list)
-        loss = round(self.global_model.loss(X_total, t_total), 2)
+        # We compute the exepected loss
+        self.copy_global_model(node_list)
+        loss = round(sum([node.local_loss() for node in node_list]), 5)
 
-        if grouped_data:
-            return loss, X_total, t_total
-        else:
-            return loss
+        return loss
 
     def set_node_number(self, node_list):
 
