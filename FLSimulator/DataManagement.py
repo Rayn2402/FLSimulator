@@ -374,7 +374,7 @@ class TwoClusterGenerator:
         return X, t
 
     @staticmethod
-    def plot_labels(X, t, title='Class labels', x1_label='$X_1$', x2_label='$X_2$', axe=None, legend=False):
+    def plot_labels(X, t, title='Class labels', x1_label='$X_1$', x2_label='$X_2$', axe=None, legend=False, ylim=(-2, 2.8)):
 
         """
         Plots the labels
@@ -386,6 +386,7 @@ class TwoClusterGenerator:
         :param x2_label: label associated to y-axis
         :param axe: pyplot axe
         :param legend: bool indicating if we need the legend or not
+        :param ylim: tuple with limits of y-axis
         """
         # Enable LaTeX
         plt.rc('text', usetex=True)
@@ -402,6 +403,7 @@ class TwoClusterGenerator:
         if axe is not None:
             axe.set_title(title)
             axe.set_xlabel(x1_label)
+            axe.set_ylim(-2, 2.8)
             axe.set_ylabel(x2_label)
             axe.scatter(a[0:i, 0], a[0:i, 1], edgecolors='k', label='0')
             axe.scatter(a[i:, 0], a[i:, 1], edgecolors='k', label='1')
@@ -410,6 +412,7 @@ class TwoClusterGenerator:
         else:
             plt.title(title)
             plt.xlabel(x1_label)
+            plt.ylim(ylim[0], ylim[1])
             plt.ylabel(x2_label)
             plt.scatter(a[0:i, 0], a[0:i, 1], edgecolors='k', label='0')
             plt.scatter(a[i:, 0], a[i:, 1], edgecolors='k', label='1')
@@ -419,8 +422,8 @@ class TwoClusterGenerator:
             plt.close()
 
     @staticmethod
-    def plot_feature_distribution(X, t, x1_title='$X_1$ marginal densities',
-                                  x2_title='$X_2$ marginal densities', axes=None):
+    def plot_feature_distribution(X, t, x1_title='$X_1$ marginal distributions',
+                                  x2_title='$X_2$ marginal distributions', axes=None, legend=False):
 
         """
         Shows an histogram of the feature distribution X
@@ -452,13 +455,17 @@ class TwoClusterGenerator:
 
         axes[0].hist(a[0:i, 0], alpha=0.5, label='0', density=True)
         axes[0].hist(a[i:, 0], alpha=0.5, label='1', density=True)
-        axes[0].legend(loc='upper right')
-        axes[0].set_title(x1_title)
+        if x1_title is not None:
+            axes[0].set_title(x1_title)
 
         axes[1].hist(a[0:i, 1], alpha=0.5, label='0', density=True)
         axes[1].hist(a[i:, 1], alpha=0.5, label='1', density=True)
-        axes[1].legend(loc='upper right')
-        axes[1].set_title(x2_title)
+        if x2_title is not None:
+            axes[1].set_title(x2_title)
+
+        if legend:
+            axes[0].legend(loc='upper right')
+            axes[1].legend(loc='upper right')
 
         if show:
             fig.tight_layout(h_pad=5, pad=3)
@@ -466,38 +473,70 @@ class TwoClusterGenerator:
             plt.close()
 
     @staticmethod
-    def distribution_and_labels(X, t, title=None):
+    def distribution_and_labels(Xs, ts, title=None, sub_height=1.25, sub_width=8, count_max=200):
 
         """
         Plots a figure with both feature distribution and labels
 
-        :param X: N x 1 numpy array
-        :param t: N x 1 numpy array
+        :param Xs: list of N x 2 numpy array
+        :param ts: list of N x 1 numpy array
+        :param sub_height: height of every subplot in the figure
+        :param sub_width: width of each row in the figure
+        :param count_max: maximum number of observations in one class
         :param title: plot title
         """
         # Enable LaTeX
         plt.rc('text', usetex=True)
 
+        # We save the number of X datasets
+        n = len(Xs)
+
         # Set subplots
-        fig, axes = plt.subplots(nrows=1, ncols=4, figsize=(10, 3))
+        fig, axes = plt.subplots(nrows=n, ncols=4, sharex='col', figsize=(sub_width, sub_height*n))
 
         if title is not None:
-            fig.suptitle(title)
+            fig.suptitle(title, y=1.025)
 
-        # Labels
-        TwoClusterGenerator.plot_labels(X, t, axe=axes[0])
+        # Set first line with titles
+        if n > 1:
+            axe = axes[0]
+        else:
+            axe = axes
 
-        # Histogram
-        TwoClusterGenerator.plot_feature_distribution(X, t, axes=[axes[2], axes[3]])
+        # Class Labels
+        TwoClusterGenerator.plot_labels(Xs[0], ts[0], x1_label='', axe=axe[0], legend=True)
+
+        # Densities
+        TwoClusterGenerator.plot_feature_distribution(Xs[0], ts[0], axes=[axe[2], axe[3]])
 
         # Bar plot
-        axes[1].bar(x=[0, 1], height=[(t == 0).sum(), (t == 1).sum()], color=['C0', 'C1'], edgecolor='k')
-        axes[1].set_xticks([0, 1])
-        axes[1].set_title("Labels' Count")
+        axe[1].bar(x=[0, 1], height=[(ts[0] == 0).sum(), (ts[0] == 1).sum()], color=['C0', 'C1'], edgecolor='k')
+        axe[1].set_xticks([0, 1])
+        axe[1].set_ylim(0, count_max)
+        axe[1].set_title("Class count")
 
-        fig.tight_layout(h_pad=5, pad=3)
+        # Subplots construction
+        for i in range(1, n):
+
+            # Class Labels
+            if i == n-1:
+                TwoClusterGenerator.plot_labels(Xs[i], ts[i], title='', axe=axes[i][0])
+            else:
+                TwoClusterGenerator.plot_labels(Xs[i], ts[i], title='', x1_label='', axe=axes[i][0])
+
+            # Distributions
+            TwoClusterGenerator.plot_feature_distribution(Xs[i], ts[i], x1_title=None, x2_title=None,
+                                                          axes=[axes[i][2], axes[i][3]])
+
+            # Bar plot
+            axes[i][1].bar(x=[0, 1], height=[(ts[i] == 0).sum(), (ts[i] == 1).sum()], color=['C0', 'C1'], edgecolor='k')
+            axes[i][1].set_ylim(0, count_max)
+            axes[i][1].set_xticks([0, 1])
+
+        fig.tight_layout(h_pad=0.1, w_pad=0.01)
         plt.show()
         plt.close()
+
 
 
 
