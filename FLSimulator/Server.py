@@ -121,7 +121,8 @@ class CentralServer:
         feature_size = self.global_model.phi(input_sample).shape[1]
         self.global_model.init_weight(feature_size)
 
-    def plot_global_accuracy(self, node_list, title=None):
+    def plot_global_accuracy(self, node_list, title=None, save=False, save_path='',
+                             filename='model', save_format='.pdf'):
 
         """
         Plots the model result over the complete network dataset
@@ -129,6 +130,10 @@ class CentralServer:
 
         :param node_list: list of nodes
         :param title: title of the figure
+        :param save: bool indicating if we want to save plot figure
+        :param save_path: path indicating where we save the file if it is saved
+        :param filename: name of the file if it is saved
+        :param save_format: saving format
         """
 
         # Loss computation
@@ -141,7 +146,8 @@ class CentralServer:
 
         # Plotting of the progress
         X_total, t_total = regroup_data_base(node_list)
-        self.global_model.plot_model(X_total, t_total, title)
+        self.global_model.plot_model(X_total, t_total, title, save=save, save_path=save_path,
+                                     filename=filename, save_format=save_format)
 
         return loss
 

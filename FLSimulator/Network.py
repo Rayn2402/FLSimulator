@@ -86,7 +86,8 @@ class FederatedNetwork:
         # We set nodes masses
         self.__set_nodes_masses(node_list)
 
-    def run_learning(self, nb_of_rounds=1, show_round_results=False, loss_progress=False):
+    def run_learning(self, nb_of_rounds=1, show_round_results=False, loss_progress=False,
+                     save_round_figs=False, save_path='', filename='model', save_format='.pdf'):
 
         """
         Runs the federated learning
@@ -94,6 +95,10 @@ class FederatedNetwork:
         :param nb_of_rounds: Rounds of federated learning to do
         :param show_round_results: bool indicating if we show global accuracy plot between each round
         :param loss_progress: bool indicating if we should return an history of loss progression
+        :param save_round_figs: bool indicating if we want to save model accuracy plot at each round
+        :param save_path: path indicating where we save the file if it is saved
+        :param filename: name of the file if it is saved
+        :param save_format: saving format
         """
 
         # Initialization of list containing loss progression
@@ -104,7 +109,10 @@ class FederatedNetwork:
             self.server.train(self.nodes)
 
             if show_round_results:
-                loss_progression.append(self.server.plot_global_accuracy(self.nodes, title='Round ' + str(i+1)))
+                loss_progression.append(self.server.plot_global_accuracy(self.nodes, title='Round ' + str(i+1),
+                                                                         save=save_round_figs, save_path=save_path,
+                                                                         filename=filename+'_'+'round'+str(i+1),
+                                                                         save_format=save_format))
 
             elif not show_round_results and loss_progress:
                 loss_progression.append(self.server.global_loss(self.nodes))

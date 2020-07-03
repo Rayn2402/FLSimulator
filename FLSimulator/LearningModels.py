@@ -168,7 +168,7 @@ class LinearModel:
         """
         return NotImplementedError
 
-    def plot_model(self, X, t, title=None):
+    def plot_model(self, X, t, title=None, save=False, save_path='', filename='model', save_format='.pdf'):
 
         """
         Plots the curve prediction of our model
@@ -176,6 +176,9 @@ class LinearModel:
         :param X: N x 1 numpy array with training X
         :param t: 1 x N numpy array with training labels
         :param title: title of the figure
+        :param save_path: path indicating where we save the file if it is saved
+        :param filename: name of the file if it is saved
+        :param save_format: saving format
         :return:
         """
         raise NotImplementedError
@@ -255,7 +258,7 @@ class GDRegressor(LinearModel):
 
         return copy
 
-    def plot_model(self, X, t, title=None):
+    def plot_model(self, X, t, title=None, save=False, save_path='', filename='model', save_format='.pdf'):
 
         """
         Plots the curve prediction of our model (only available with 1-D feature space)
@@ -263,7 +266,10 @@ class GDRegressor(LinearModel):
         :param X: N x 1 numpy array with training X
         :param t: 1 x N numpy array with training labels
         :param title: title of the figure
-        :return:
+        :param save: bool indicating if we want to save picture or not
+        :param save_path: path indicating where we save the file if it is saved
+        :param filename: name of the file if it is saved
+        :param save_format: saving format
         """
         if X.shape[1] > 1:
             raise Exception('This function only accept feature spaces that are 1-D')
@@ -272,8 +278,13 @@ class GDRegressor(LinearModel):
         t_sample = [self.predict(np.array([[x]])) for x in x_sample]
         plt.plot(X, t, 'o')
         plt.plot(x_sample, t_sample, 'k')
+
         if title is not None:
             plt.title(title)
+
+        if save:
+            plt.savefig(save_path + filename + save_format, format=save_format[1:])
+
         plt.show()
         plt.close()
 
@@ -365,7 +376,7 @@ class LogisticRegressor(LinearModel):
 
         return copy
 
-    def plot_model(self, X, t, title=None):
+    def plot_model(self, X, t, title=None, save=False, save_path='', filename='model', save_format='.pdf'):
 
         """
         Plots the curve prediction of our model (only available with 1-D or 2-D feature space)
@@ -374,6 +385,10 @@ class LogisticRegressor(LinearModel):
         :param X: N x 1 or N x 2 numpy array with training X
         :param t: N x 1 numpy array with training labels
         :param title: title of the figure
+        :param save: bool indicating if we want to save picture or not
+        :param save_path: path indicating where we save the file if it is saved
+        :param filename: name of the file if it is saved
+        :param save_format: saving format
         """
         if X.shape[1] > 2:
             raise Exception('This function only accept feature spaces that are 1-D or 2-D')
@@ -470,6 +485,9 @@ class LogisticRegressor(LinearModel):
                 fig.suptitle(title)
 
             fig.tight_layout(h_pad=5, pad=3)
+
+        if save:
+            plt.savefig(save_path + filename + save_format, format=save_format[1:])
 
         plt.show()
         plt.close()
