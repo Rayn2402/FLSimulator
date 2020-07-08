@@ -212,39 +212,45 @@ class OneDimensionalRDG(OneDimensionalDG):
         plt.close()
 
     @staticmethod
-    def distribution_and_labels(X, t, title=None, save=False, save_path='', filename='dist_and_labels',
+    def distribution_and_labels(X, t, title=None, axes=None, save=False, save_path='', filename='dist_and_labels',
                                 save_format='.eps'):
 
         """
-        Plots a figure with both feature distribution and labels
+        Plots a figure with both feature distribution and labels one above the other
 
         :param X: N x 1 numpy array
         :param t: N x 1 numpy array
         :param title: plot title
+        :param axes: pyplot axes
         :param save: bool indicating if we want to save picture or not
         :param save_path: path indicating where we save the file if it is saved
         :param filename: name of the file if it is saved
         :param save_format: saving format
         """
+        show = False
 
-        fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(5, 3))
+        if axes is None:
+            show = True
+            fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(5, 3))
+            axes[0].set_title('Labels')
+            axes[1].set_title('Feature Distribution')
 
         if title is not None:
-            fig.suptitle(title)
+            axes[0].set_title(title)
 
         axes[0].plot(X, t, 'o')
-        axes[0].set_title('Labels')
         axes[0].set_xlim(0, 1)
+        axes[0].set_xlabel('')
         axes[1].hist(X, color='C7', density=True)
-        axes[1].set_title('Feature Density')
         axes[1].set_xlim(0, 1)
-        fig.tight_layout(h_pad=5, pad=3)
 
         if save:
             plt.savefig(save_path + filename + save_format, format=save_format[1:])
 
-        plt.show()
-        plt.close()
+        if show:
+            fig.tight_layout()
+            plt.show()
+            plt.close()
 
 
 class OneDimensionalLRDG(OneDimensionalDG):
