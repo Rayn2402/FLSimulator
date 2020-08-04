@@ -57,21 +57,22 @@ class LinearModel:
 
         if lr_choice == 'constant':
 
-            def lr_update(last_loss, nb_w_update, X, t):
-                pass
+            def lr_update(last_loss, epoch, X, t):
+                return last_loss
 
         elif lr_choice == 'invscaling':
 
-            def lr_update(last_loss, nb_w_update, X, t):
-                self.eta = eta0/(nb_w_update**0.25)
+            def lr_update(last_loss, epoch, X, t):
+                self.eta = eta0/(epoch**0.25)
+                return last_loss
 
         else:
-            def lr_update(last_loss, nb_w_update, X, t):
+            def lr_update(last_loss, epoch, X, t):
                 current_loss = self.loss(X, t)
                 if last_loss < current_loss:
                     self.eta /= 2
 
-                last_loss = current_loss
+                return current_loss
 
         return lr_update
 
@@ -113,7 +114,8 @@ class LinearModel:
                 start = n*minibatch_size
                 end = min(X.shape[0], (n+1)*minibatch_size)
                 self.update_w(X[start:end], t[start:end])
-                self.lr_update(last_loss=last_loss, nb_w_update=(n+1+i*X.shape[0]), X=X, t=t)
+
+            last_loss = self.lr_update(last_loss=last_loss, epoch=i+1, X=X, t=t)
 
         self.eta = eta0
         return self.w
