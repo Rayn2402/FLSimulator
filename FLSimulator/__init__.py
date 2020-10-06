@@ -1,4 +1,4 @@
-from .DataManagement import OneDimensionalRDG, OneDimensionalLRDG
+from .DataManagement import OneDimensionalRDG, OneDimensionalLRDG, TwoClusterGenerator
 
 from .LearningModels import GDRegressor, LogisticRegressor
 

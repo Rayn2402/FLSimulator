@@ -19,18 +19,37 @@ class Node:
         """
 
         self.X, self.t = X, t
-        self.n = self.X.shape[0]
+        self.n_k = self.X.shape[0]
         self.model = None
+        self.p_k = None
         self.id = 'Node ' + str(Node.__counter)
         Node.__counter += 1
 
     def __repr__(self):
         return self.id
 
+    def set_mass(self, n):
+
+        """
+        Sets the mass of the node according to the ratio n_k / n
+
+        :param n: total sample size of the entire network
+        """
+        self.p_k = self.n_k/n
+
+    def local_loss(self):
+        """
+
+        Computes the local expected loss for the node's dataset
+
+        """
+        # Compute p_k*(1/n_k)*local loss
+        return self.p_k*(self.model.loss(self.X, self.t)/self.n_k)
+
     def update(self, E, C, w):
 
         """
-        Train the node's model with local database
+        Trains the node's model with local database
 
         :param E: number of epochs to execute
         :param C: batch size during training
@@ -55,32 +74,70 @@ class FederatedNetwork:
 
         """
 
+        # We set the central server and the nodes
         self.server = central_server
+        self.server.set_node_number(node_list)
         self.nodes = node_list
+
+        # We init the global model and copy it in all nodes
         self.server.init_global_model_weights(self.nodes)
         self.server.copy_global_model(self.nodes)
 
-    def run_learning(self, nb_of_rounds=1, show_round_results=False):
+        # We set nodes masses
+        self.__set_nodes_masses(node_list)
+
+    def run_learning(self, nb_of_rounds=1, show_round_results=False, loss_progress=False,
+                     save_round_figs=False, save_path='', filename='model', save_format='.pdf'):
 
         """
-        Run the federated learning
+        Runs the federated learning
 
         :param nb_of_rounds: Rounds of federated learning to do
-        :param show_round_results: tuple (bool, start, stop)
+        :param show_round_results: bool indicating if we show global accuracy plot between each round
+        :param loss_progress: bool indicating if we should return an history of loss progression
+        :param save_round_figs: bool indicating if we want to save model accuracy plot at each round
+        :param save_path: path indicating where we save the file if it is saved
+        :param filename: name of the file if it is saved
+        :param save_format: saving format
         """
+
+        # Initialization of list containing loss progression
+        loss_progression = []
 
         for i in range(nb_of_rounds):
+
             self.server.train(self.nodes)
+
             if show_round_results:
-                self.global_accuracy(title='Round ' + str(i + 1))
+                loss_progression.append(self.server.plot_global_accuracy(self.nodes, title='Round ' + str(i+1),
+                                                                         save=save_round_figs, save_path=save_path,
+                                                                         filename=filename+'_'+'round'+str(i+1),
+                                                                         save_format=save_format))
 
-    def global_accuracy(self, title=None):
+            elif not show_round_results and loss_progress:
+                loss_progression.append(self.server.global_loss(self.nodes))
+
+        if loss_progress:
+            return loss_progression
+
+    @staticmethod
+    def __set_nodes_masses(node_list):
 
         """
-        Plots the model result over the complete network dataset
-        Only available if the model as the function plot_model implemented (1-D or 2-D model)
+        Sets nodes masses according to ratio n_k / n
 
-        :param title: title of the figure
+        :param node_list: list of nodes
+
         """
+        n = sum([node.n_k for node in node_list])
 
-        self.server.plot_global_accuracy(self.nodes, title)
+        for node in node_list:
+            node.set_mass(n)
+
+
+
+
+
+
+
+

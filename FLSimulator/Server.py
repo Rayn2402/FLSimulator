@@ -31,12 +31,13 @@ class CentralServer:
         self.E = E
         self.select_nodes = self.node_selection_function(node_selection, random_size)
         self.aggregate = self.aggregation_function(aggregation)
+        self.N = None
 
     @staticmethod
     def node_selection_function(node_selection, random_size):
 
         """
-        Build the function to select node in list of nodes available
+        Builds the function to select node in list of nodes available
 
         :param node_selection: node selection choice
         :param random_size: percentage of randomly selected nodes if node selection is 'random'
@@ -61,7 +62,7 @@ class CentralServer:
     def aggregation_function(self, aggregation):
 
         """
-        Build the function to aggregate models from a list of nodes
+        Builds the function to aggregate models from a list of nodes
 
         :param aggregation: aggregation choice
         :return: function
@@ -72,19 +73,22 @@ class CentralServer:
 
         def aggregate(node_list):
 
-            # We compute the total sample size every time in case nodes are randomly sampled in each round
-            # of federated training
-            N = sum([node.n for node in node_list])
+            """
+            FedAvg as in "ON THE CONVERGENCE OF FEDAVG ON NON-IID DATA" (Li and al. 2020)
+
+            :param node_list: list of nodes
+            """
+            K = len(node_list)
 
             # We update w with a weighted average of every node models w
-            self.global_model.w = sum([(node.n/N)*node.model.w for node in node_list])
+            self.global_model.w = (self.N/K)*sum([node.p_k*node.model.w for node in node_list])
 
         return aggregate
 
     def copy_global_model(self, node_list):
 
         """
-        Copy global model in each node of the node list
+        Copies global model in each node of the node list
         Used in the initialization of a Network
 
         :param node_list: list of nodes
@@ -95,7 +99,7 @@ class CentralServer:
     def train(self, node_list):
 
         """
-        Train the global model among a list of nodes
+        Trains the global model among a list of nodes
 
         :param node_list: list of nodes
         """
@@ -117,7 +121,8 @@ class CentralServer:
         feature_size = self.global_model.phi(input_sample).shape[1]
         self.global_model.init_weight(feature_size)
 
-    def plot_global_accuracy(self, node_list, title=None):
+    def plot_global_accuracy(self, node_list, title=None, save=False, save_path='',
+                             filename='model', save_format='.pdf'):
 
         """
         Plots the model result over the complete network dataset
@@ -125,23 +130,55 @@ class CentralServer:
 
         :param node_list: list of nodes
         :param title: title of the figure
+        :param save: bool indicating if we want to save plot figure
+        :param save_path: path indicating where we save the file if it is saved
+        :param filename: name of the file if it is saved
+        :param save_format: saving format
         """
-        X_total, t_total = regroup_data_base(node_list)
 
-        loss = round(self.global_model.loss(X_total, t_total), 2)
+        # Loss computation
+        loss = self.global_loss(node_list)
 
         if title is None:
-            title = 'Loss : ' + str(loss)
+            title = 'E(w) = ' + str(loss)
         else:
-            title += ' - Loss ' + str(loss)
+            title += ' - E(w) = ' + str(loss)
 
-        self.global_model.plot_model(X_total, t_total, title)
+        # Plotting of the progress
+        X_total, t_total = regroup_data_base(node_list)
+        self.global_model.plot_model(X_total, t_total, title, save=save, save_path=save_path,
+                                     filename=filename, save_format=save_format)
+
+        return loss
+
+    def global_loss(self, node_list):
+
+        """
+        Computes the expected loss of the distributed network
+
+        :param node_list: list of nodes
+        :return: weighted loss and total loss
+        """
+
+        # We compute the exepected loss
+        self.copy_global_model(node_list)
+        loss = round(sum([node.local_loss() for node in node_list]), 5)
+
+        return loss
+
+    def set_node_number(self, node_list):
+
+        """
+        Set the value N of the server (number of node in the network)
+        :param node_list: list of nodes
+        """
+        self.N = len(node_list)
 
 
 def regroup_data_base(node_list):
 
     """
-    Regroups all data base of the different Nodes into a single data base
+    Regroups all databases of the different Nodes into a single data base
 
     :param node_list: list of Nodes
     :return: X, t : numpy array
