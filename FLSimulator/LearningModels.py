@@ -2,9 +2,9 @@
     File containing all code related to machine learning models available for federated learning simulation
 
     NOTE :
-            - L indicates the original dimension of feature vectors include in Xbase X
+            - L indicates the original dimension of feature vectors include in X
             - M indicates the dimension of new feature vectors returned by phi
-            - N indicates the number of feature vectors in the Xbase X
+            - N indicates the number of feature vectors in X
 
 """
 
