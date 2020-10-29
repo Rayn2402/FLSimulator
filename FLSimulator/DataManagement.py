@@ -48,7 +48,7 @@ class OneDimensionalDG:
     def plot_feature_distribution(X, save=False, save_path='', filename='dist', save_format='.eps'):
 
         """
-        Shows an histogram of the feature distribution X
+        Shows a density histogram of the feature distribution X
 
         :param X: N x 1 numpy array
         :param save: bool indicating if we want to save picture or not
@@ -69,7 +69,7 @@ class OneDimensionalDG:
                     filename='labels', save_format='.eps'):
 
         """
-        Plots the labels point (x_n, t_n)
+        Plots the data points (x_n, t_n)
 
         :param X: N x 1 numpy array
         :param t: N x 1 numpy array
@@ -119,9 +119,9 @@ class OneDimensionalRDG(OneDimensionalDG):
         One Dimensional Regression Data Generator
 
         :param noise: standard deviation of the gaussian noise applied to the labels
-        :param a: alpha parameter of the beta distribution that generate the features
-        :param b: beta parameter of the beta distribution that generate the features
-        :param label_function: Choice of function to generate data
+        :param a: alpha parameter of the beta distribution that generates the feature
+        :param b: beta parameter of the beta distribution that generates the feature
+        :param label_function: choice of function that generates label associated to each feature
         """
 
         if label_function not in label_function_choices:
@@ -134,7 +134,7 @@ class OneDimensionalRDG(OneDimensionalDG):
     def generate_data(self, N):
 
         """
-        Generates noisy labels associated with the features
+        Generates features and noisy labels associated to them.
 
         :param N: number of 1-D feature vector needed
         :return: N x 1 numpy array with feature vectors, N x 1 numpy array with labels
@@ -189,7 +189,7 @@ class OneDimensionalRDG(OneDimensionalDG):
                     filename='labels', save_format='.eps'):
 
         """
-        Plots the labels point (x_n, t_n)
+        Plots the points (x_n, t_n)
 
         :param X: N x 1 numpy array
         :param t: N x 1 numpy array
@@ -216,7 +216,7 @@ class OneDimensionalRDG(OneDimensionalDG):
                                 save_format='.eps'):
 
         """
-        Plots a figure with both feature distribution and labels one above the other
+        Plots a figure with both feature distribution and data points
 
         :param X: N x 1 numpy array
         :param t: N x 1 numpy array
