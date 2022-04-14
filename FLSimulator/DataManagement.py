@@ -4,155 +4,173 @@
 
 
 """
-import random
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import random
+
+from abc import ABC, abstractmethod
 from .BasisFunctions import polynomial_features
 from scipy.stats import beta, multivariate_normal
+from typing import Callable, Tuple
 
 label_function_choices = ['linear', 'sin', 'tanh']
 
 
-class OneDimensionalDG:
-
-    def __init__(self, a=1, b=1, noise=0):
-
+class OneDimensionalDG(ABC):
+    """
+    Abstract class used for 1D data generator.
+    Each data point is a pair (x, y) where x and y are scalars.
+    """
+    def __init__(self,
+                 f: Callable,
+                 a: float = 1,
+                 b: float = 1,
+                 noise: float = 0):
         """
-        One Dimension Data Generator
+        Sets the protected attributes
 
-        :param a: alpha parameter of the beta distribution that generate the features
-        :param b: beta parameter of the beta distribution that generate the features
-        :param noise: noise added to the data labels (definition depend on the One dimensional DG child class)
-
+        Args:
+            f: function generating the targets from the inputs
+            a: alpha parameter of the beta distribution that generates the features
+            b: beta parameter of the beta distribution that generates the features
+            noise: noise added to the data labels
         """
+        # Noise input validation
         if not 0 <= noise <= 1:
-            raise Exception('Noise value must be included between 0 and 1')
+            raise ValueError('Noise value must be included between 0 and 1')
 
-        self.alpha = a
-        self.beta = b
-        self.noise = noise
-        self.label_function = None
+        self._alpha: float = a
+        self._beta: float = b
+        self._f: Callable = f
+        self._noise: float = noise
 
-    def generate_data(self, N):
-
+    def plot_ground_truth(self) -> None:
         """
-        Generates labels associated with the features
-
-        :param N: number of 1-D feature vector needed
-        :return: N x 1 numpy array with feature vectors, N x 1 numpy array with labels
-
+        Plots the ground truth curve used to generate the labels
         """
-        raise NotImplementedError
-
-    @staticmethod
-    def plot_feature_distribution(X, save=False, save_path='', filename='dist', save_format='.eps'):
-
-        """
-        Shows a density histogram of the feature distribution X
-
-        :param X: N x 1 numpy array
-        :param save: bool indicating if we want to save picture or not
-        :param save_path: path indicating where we save the file if it is saved
-        :param filename: name of the file if it is saved
-        :param save_format: saving format
-        """
-
-        plt.hist(X, color='C7', density=True)
-
-        if save:
-            plt.savefig(save_path+filename+save_format, format=save_format[1:])
-
+        x = np.linspace(0, 1, 500).resize((500, 1))
+        y = self._f(x)
+        plt.plot(x, y, 'k')
         plt.show()
         plt.close()
 
-    def plot_labels(self, X, t, add_ground_truth=False, save=False, save_path='',
-                    filename='labels', save_format='.eps'):
-
+    @abstractmethod
+    def generate_data(self, n: int) -> Tuple[np.array, np.array]:
         """
-        Plots the data points (x_n, t_n)
+        Generates n data points
 
-        :param X: N x 1 numpy array
-        :param t: N x 1 numpy array
-        :param add_ground_truth: bool indicating if we should plot function used to generate labels
-        :param save: bool indicating if we want to save picture or not
-        :param save_path: path indicating where we save the file if it is saved
-        :param filename: name of the file if it is saved
-        :param save_format: saving format
+        Args:
+            n: number of data points
+
+        Returns: (N, 1) array with features, (N, 1) array with noisy targets
         """
-
         raise NotImplementedError
 
-    @staticmethod
-    def distribution_and_labels(X, t, title=None, save=False, save_path='',
-                                filename='dist_and_labels', save_format='.eps'):
-        """
-        Plots a figure with both feature distribution and labels
-
-        :param X: N x 1 numpy array
-        :param t: N x 1 numpy array
-        :param title: plot title
-        :param save: bool indicating if we want to save picture or not
-        :param save_path: path indicating where we save the file if it is saved
-        :param filename: name of the file if it is saved
-        :param save_format: saving format
-        """
-
-        raise NotImplementedError
-
-    def plot_ground_truth(self):
-
-        """
-        Plots the ground truth curve used to generate labels
-
-        """
-        X_sample = np.linspace(0, 1, 500)
-        X_sample.resize((500, 1))
-        t_sample = self.label_function(X_sample)
-        plt.plot(X_sample, t_sample, 'k')
+    # @staticmethod
+    # def plot_feature_distribution(X, save=False, save_path='', filename='dist', save_format='.eps'):
+    #
+    #     """
+    #     Shows a density histogram of the feature distribution X
+    #
+    #     :param X: N x 1 numpy array
+    #     :param save: bool indicating if we want to save picture or not
+    #     :param save_path: path indicating where we save the file if it is saved
+    #     :param filename: name of the file if it is saved
+    #     :param save_format: saving format
+    #     """
+    #
+    #     plt.hist(X, color='C7', density=True)
+    #
+    #     if save:
+    #         plt.savefig(save_path+filename+save_format, format=save_format[1:])
+    #
+    #     plt.show()
+    #     plt.close()
+    #
+    # def plot_labels(self, X, t, add_ground_truth=False, save=False, save_path='',
+    #                 filename='labels', save_format='.eps'):
+    #
+    #     """
+    #     Plots the data points (x_n, t_n)
+    #
+    #     :param X: N x 1 numpy array
+    #     :param t: N x 1 numpy array
+    #     :param add_ground_truth: bool indicating if we should plot function used to generate labels
+    #     :param save: bool indicating if we want to save picture or not
+    #     :param save_path: path indicating where we save the file if it is saved
+    #     :param filename: name of the file if it is saved
+    #     :param save_format: saving format
+    #     """
+    #
+    #     raise NotImplementedError
+    #
+    # @staticmethod
+    # def distribution_and_labels(X, t, title=None, save=False, save_path='',
+    #                             filename='dist_and_labels', save_format='.eps'):
+    #     """
+    #     Plots a figure with both feature distribution and labels
+    #
+    #     :param X: N x 1 numpy array
+    #     :param t: N x 1 numpy array
+    #     :param title: plot title
+    #     :param save: bool indicating if we want to save picture or not
+    #     :param save_path: path indicating where we save the file if it is saved
+    #     :param filename: name of the file if it is saved
+    #     :param save_format: saving format
+    #     """
+    #
+    #     raise NotImplementedError
 
 
 class OneDimensionalRDG(OneDimensionalDG):
-
-    def __init__(self, noise=0.10, a=1, b=1, label_function='linear'):
-
+    """
+    Data generator for 1D regression task
+    Each data point is a pair (x, y) where x and y are scalars.
+    """
+    def __init__(self,
+                 a: float = 1,
+                 b: float = 1,
+                 noise: float = 0.10,
+                 target_generator: str = 'linear'):
         """
-        One Dimensional Regression Data Generator
+        Builds the target generator function and sets the protected attributes
+        using the parent's constructor
 
-        :param noise: standard deviation of the gaussian noise applied to the labels
-        :param a: alpha parameter of the beta distribution that generates the feature
-        :param b: beta parameter of the beta distribution that generates the feature
-        :param label_function: choice of function that generates label associated to each feature
+        Args:
+            a: alpha parameter of the beta distribution that generates the feature
+            b: beta parameter of the beta distribution that generates the feature
+            noise: standard deviation of the gaussian noise applied to the labels
+            target_generator: choice of the function that generates the labels
         """
+        # Target generator validation
+        if target_generator not in label_function_choices:
+            raise Exception(f'The target generator must be in {label_function_choices}')
 
-        if label_function not in label_function_choices:
-            raise Exception('Label function chosen is not recognized')
+        # Construction of the data generator
+        f = self._generate_label_function(target_generator)
+        super().__init__(f, a, b, noise)
 
-        super().__init__(a, b, noise)
-
-        self.label_function = self.generate_label_function(label_function)
-
-    def generate_data(self, N):
-
+    def generate_data(self, n: int) -> Tuple[np.array, np.array]:
         """
-        Generates features and noisy labels associated to them.
+        Generates n data points
 
-        :param N: number of 1-D feature vector needed
-        :return: N x 1 numpy array with feature vectors, N x 1 numpy array with labels
+        Args:
+            n: number of data points
+
+        Returns: (N, 1) array with features, (N, 1) array with noisy targets
         """
         # Generate features
-        features = np.array(beta.rvs(a=self.alpha, b=self.beta, size=N))
-        features.resize((N, 1))
+        x = np.array(beta.rvs(a=self._alpha, b=self._beta, size=n)).resize((n, 1))
 
         # Generate labels and add noise
-        labels = self.label_function(features)
-        random_noise = np.random.normal(loc=0, scale=self.noise, size=features.shape[0])
-        random_noise.resize((features.shape[0], 1))
-        labels += random_noise
+        y = self._f(x)
+        random_noise = np.random.normal(loc=0, scale=self._noise, size=n).resize(n, 1)
+        y += random_noise
 
-        return features, labels
+        return x, y
 
     @staticmethod
-    def generate_label_function(choice):
+    def _generate_label_function(choice):
 
         """
         Generates the function that will produce labels associated with the features
